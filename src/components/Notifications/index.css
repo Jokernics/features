@@ -1,4 +1,13 @@
 
+.notice-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.notice-wrapper {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;
+}
+
 .fadeIn {
     animation: fadeIn .5s forwards;
 }
