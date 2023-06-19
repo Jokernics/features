@@ -1,13 +1,14 @@
 import React, { memo, useState } from "react";
 import "./index.css";
-import { storeNoticeType } from "./useNotification";
+import { storeNoticeType } from "./NoticeProvider";
 
 type props = {
   notice: storeNoticeType;
   setNotifications: React.Dispatch<React.SetStateAction<storeNoticeType[]>>;
+  maxWidth?: string;
 };
 
-export default memo(function Notification({ notice, setNotifications }: props) {
+export default memo(function Notification({ notice, setNotifications, maxWidth }: props) {
   const [animation, setAnimation] = useState("fadeIn");
 
   const deleteNotice = () => {
@@ -26,8 +27,13 @@ export default memo(function Notification({ notice, setNotifications }: props) {
 
   return (
     <div className={`${animation}`} onAnimationEnd={handleAnimationEnd}>
-      <div className={`border-cyan-300 bg-gray-400 rounded-md px-4 py-2 mb-2 relative w-fit min-w-[10rem] max-w-[250px] h-fit`}>
-        <div style={{overflowWrap: 'break-word'}} className="wrap">{notice.value}</div>
+      <div
+        style={{ maxWidth: maxWidth || "80vw" }}
+        className={`relative min-h-[2rem] border-cyan-300 bg-gray-400 rounded-md px-4 py-2 mb-2 w-fit min-w-[10rem] h-fit`}
+      >
+        <div style={{ overflowWrap: "break-word" }} className="wrap">
+          {notice.value}
+        </div>
         <button onClick={deleteNotice} className="absolute -top-1 right-1">
           x
         </button>

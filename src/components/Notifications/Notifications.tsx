@@ -1,14 +1,15 @@
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Notification from "./Notification";
-import { storeNoticeType } from "./useNotification";
+import { storeNoticeType } from "./NoticeProvider";
 
 type props = {
   notifications: storeNoticeType[];
   setNotifications: React.Dispatch<React.SetStateAction<storeNoticeType[]>>;
-  maxContainerWidth?: string;
+  maxWidth?: string;
 };
 
-export default function Notifications({ notifications, setNotifications }: props) {
+export default function Notifications({ notifications, setNotifications, maxWidth }: props) {
   const containerRef = useRef<null | HTMLDivElement>(null);
   const noticePreviousCounter = useRef(notifications.length);
 
@@ -23,12 +24,17 @@ export default function Notifications({ notifications, setNotifications }: props
   }, [notifications]);
 
   return (
-    <div ref={containerRef} className="fixed bottom-0 right-6 max-h-screen overflow-auto notice-wrapper">
-      <div className="flex flex-col justify-end items-end py-2 mt-auto">
-        {notifications.map((notice, index) => {
-          return <Notification key={notice.key} notice={notice} setNotifications={setNotifications} />;
-        })}
-      </div>
-    </div>
+    <>
+      {createPortal(
+        <div ref={containerRef} className="fixed bottom-0 right-6 max-h-screen overflow-auto notice-wrapper">
+          <div className="flex flex-col justify-end items-end py-2 mt-auto">
+            {notifications.map((notice, index) => {
+              return <Notification key={notice.key} {...{ notice, setNotifications, maxWidth }} />;
+            })}
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
