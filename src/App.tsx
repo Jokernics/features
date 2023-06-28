@@ -9,24 +9,13 @@ function App() {
   return (
     <NoticeProvider>
       <div className="flex flex-col overflow-auto h-screen px-4 py-2">
-        <label>
-          <h5>Notifications</h5>
-          <NoticeTestComp />
-        </label>
+        <NoticeExample />
+        <ButtonExample />
+        <ImageWithZoomExample />
+        <ContextMenuExample />
       </div>
     </NoticeProvider>
   );
 }
 
 export default App;
-
-const NoticeTestComp = () => {
-  return (
-    <div className="flex flex-col gap-3">
-      <NoticeExample />
-      <ButtonExample />
-      <ImageWithZoomExample />
-      <ContextMenuExample />
-    </div>
-  );
-};
