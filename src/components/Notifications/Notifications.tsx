@@ -25,7 +25,7 @@ export default function Notifications({ notifications, setNotifications, maxWidt
 
   return (
     <>
-      {createPortal(
+      {notifications.length && createPortal(
         <div ref={containerRef} className="fixed bottom-0 right-6 max-h-screen overflow-auto notice-wrapper">
           <div className="flex flex-col justify-end items-end py-2 mt-auto">
             {notifications.map((notice, index) => {

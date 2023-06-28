@@ -1,9 +1,9 @@
-import { useRef } from "react";
 import "./App.css";
-import { NoticeProvider } from "./components/Notifications/NoticeProvider";
-import { useAddNotice } from "./components/Notifications/useAddNotice";
-import NoticeExample from "./components/Examples/NoticeExample";
 import ButtonExample from "./components/Examples/ButtonExample";
+import ContextMenuExample from "./components/Examples/ContextMenuExample";
+import ImageWithZoomExample from "./components/Examples/ImageWithZoomExample";
+import NoticeExample from "./components/Examples/NoticeExample";
+import { NoticeProvider } from "./components/Notifications/NoticeProvider";
 
 function App() {
   return (
@@ -22,9 +22,11 @@ export default App;
 
 const NoticeTestComp = () => {
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       <NoticeExample />
       <ButtonExample />
+      <ImageWithZoomExample />
+      <ContextMenuExample />
     </div>
   );
 };
