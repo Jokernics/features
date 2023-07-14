@@ -10,7 +10,7 @@ import { NoticeProvider } from "./components/Notifications/NoticeProvider";
 function App() {
   return (
     <NoticeProvider>
-      <div className="flex flex-col overflow-auto h-screen px-4 py-2">
+      <div className="flex flex-col overflow-auto h-screen px-4 py-2 gap-4">
         <NoticeExample />
         <ButtonExample />
         <ImageWithZoomExample />

@@ -72,9 +72,8 @@ export default memo(function FileInput({
 
   return (
     <div {...listeners}>
-      {CustomInput ? (
-        <CustomInput {...{ isDragOver }} />
-      ) : (
+      {CustomInput && <CustomInput {...{ isDragOver }} />}
+      {!CustomInput && (
         <div
           className={`
             flex justify-center items-center w-full border-2 border-dotted px-1 py-4 rounded-md transition-all hover:bg-gray-100 cursor-pointer

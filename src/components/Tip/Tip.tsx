@@ -3,73 +3,93 @@ import { createPortal } from "react-dom";
 
 type cords = { top: number; left: number };
 
-type props = {
-  children: JSX.Element | string;
-  text?: string | JSX.Element;
-};
+export interface tipProps {
+  children: JSX.Element;
+  tipText: string | JSX.Element;
+  gapX?: number;
+  gapY?: number;
+  containerClass?: string;
+}
 
-export default function Tip({ children, text = "tip" }: props) {
-  const [isOpened, setIsOpened] = useState(false);
+export default function Tip({ children, tipText, gapX = 0, gapY = 5, containerClass = "" }: tipProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [cords, setCords] = useState<cords | null>(null);
-  const triggerEvent = useRef<React.MouseEvent<HTMLDivElement, MouseEvent> | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
-    const event = triggerEvent.current;
+    if (!isMounted || !tipRef.current || !contentRef.current || !(contentRef.current.firstChild instanceof HTMLElement)) return;
+    const getContent = (node: HTMLElement): HTMLElement | null => {
+      const child = node.firstChild;
+      let result = null;
 
-    if (isOpened && tipRef.current && event) {
-      if (containerRef.current) {
-        const containerCords = containerRef.current.getBoundingClientRect();
-        const tipCords = tipRef.current.getBoundingClientRect();
-        const { top, left } = containerCords;
-        setCords({ top: top - tipCords.height, left });
-        return;
+      if (child instanceof HTMLElement) {
+        const styles = getComputedStyle(child);
+
+        if (styles.display === "contents") {
+          result = getContent(child);
+        } else {
+          result = child;
+        }
       }
 
-      const clickX = event.clientX;
-      const clickY = event.clientY;
-      const screenW = window.innerWidth;
-      const screenH = window.innerHeight;
-      const rootW = tipRef.current.offsetWidth;
-      const rootH = tipRef.current.offsetHeight;
-      const right = screenW - clickX > rootW;
-      const left = !right;
-      const top = screenH - clickY > rootH;
-      const bottom = !top;
-      const cords = {} as cords;
+      return result;
+    };
 
-      if (right) {
-        cords.left = clickX + 5;
-      }
+    const contentElement = getContent(contentRef.current);
 
-      if (left) {
-        cords.left = clickX - rootW - 5;
-      }
+    if (!contentElement) return;
 
-      if (top) {
-        cords.top = clickY - rootH - 5;
-      }
+    const contentMetrics = contentElement.getBoundingClientRect();
+    const tipMetrics = tipRef.current.getBoundingClientRect();
 
-      if (bottom) {
-        cords.top = clickY - rootH - 5;
-      }
+    let topPosition = contentMetrics.top - tipMetrics.height - gapY;
+    let leftPosition = contentMetrics.left + contentMetrics.width / 2 - tipMetrics.width / 2 + gapX;
 
-      setCords(cords);
+    if (topPosition < 0) {
+      topPosition = contentMetrics.top + tipMetrics.height;
+    } else if (topPosition + tipMetrics.height > window.innerHeight) {
+      topPosition = contentMetrics.top - tipRef.current.offsetHeight;
     }
-  }, [isOpened]);
 
-  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setIsOpened(true);
-    triggerEvent.current = event;
+    if (leftPosition < 0) {
+      leftPosition = 0;
+    } else if (leftPosition + tipRef.current.offsetWidth > window.innerWidth) {
+      leftPosition = window.innerWidth - tipMetrics.width;
+    }
+
+    setCords({
+      top: topPosition,
+      left: leftPosition,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
+
+  const handleContentMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    setIsMounted(true);
   };
-  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setIsOpened(false);
-    triggerEvent.current = null;
+
+  const handleTipMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {};
+
+  const handleContentMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    setIsMounted(false);
   };
+
+  const handleTipMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    setIsMounted(false);
+  };
+
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="w-fit" ref={containerRef}>
-      {isOpened &&
+    <>
+      <div
+        onMouseEnter={handleContentMouseEnter}
+        onMouseLeave={handleContentMouseLeave}
+        className={`contents ${containerClass}`}
+        ref={contentRef}
+      >
+        {children}
+      </div>
+      {isMounted &&
         createPortal(
           <div
             style={{
@@ -80,12 +100,13 @@ export default function Tip({ children, text = "tip" }: props) {
               display: "block",
             }}
             ref={tipRef}
+            onMouseEnter={handleTipMouseEnter}
+            onMouseLeave={handleTipMouseLeave}
           >
-            {text}
+            <h5 className="tipText-center">{tipText}</h5>
           </div>,
           document.body
         )}
-      {children}
-    </div>
+    </>
   );
 }

@@ -13,7 +13,7 @@ type ContextMenuTrigger = { children: ReactElement; data?: any };
 
 export const useContextMenu = () => {
   const [menuCords, setMenuCords] = useState<cords | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerData = useRef<triggerData>({
     event: null,
@@ -21,12 +21,12 @@ export const useContextMenu = () => {
   });
   
   const handleOpen = () => {
-    setIsOpen(true);
+    setIsMounted(true);
   };
 
   const hide = () => {
     setMenuCords(null);
-    setIsOpen(false);
+    setIsMounted(false);
     triggerData.current.data = null;
     triggerData.current.event = null;
   };
@@ -34,7 +34,7 @@ export const useContextMenu = () => {
   useLayoutEffect(() => {
     const event = triggerData.current.event;
 
-    if (isOpen && menuRef.current && event) {
+    if (isMounted && menuRef.current && event) {
       const clickX = event.clientX;
       const clickY = event.clientY;
       const screenW = window.innerWidth;
@@ -65,13 +65,13 @@ export const useContextMenu = () => {
 
       setMenuCords(cords);
     }
-  }, [isOpen]);
+  }, [isMounted]);
 
   const ContextMenuWrapper = useCallback(
     ({ className, children }: ContextMenuWrapper) => {
       return (
         <>
-          {isOpen &&
+          {isMounted &&
             createPortal(
               <menu
                 ref={menuRef}
@@ -91,7 +91,7 @@ export const useContextMenu = () => {
         </>
       );
     },
-    [isOpen, menuCords]
+    [isMounted, menuCords]
   );
 
   const MenuItem = useCallback(({ className, onClick, children }: MenuItem) => {
@@ -146,7 +146,7 @@ export const useContextMenu = () => {
     ContextMenuWrapper,
     MenuItem,
     triggerData: triggerData.current,
-    isOpen: !!menuCords,
+    isMounted: !!menuCords,
     hide,
   };
 };
