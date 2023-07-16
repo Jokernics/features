@@ -1,6 +1,7 @@
 import React, { memo, useState } from "react";
 import "./index.css";
 import { storeNoticeType } from "./NoticeProvider";
+import { ReactComponent as CloseIcon } from './closeCross.svg'
 
 type props = {
   notice: storeNoticeType;
@@ -34,9 +35,7 @@ export default memo(function Notification({ notice, setNotifications, maxWidth }
         <div style={{ overflowWrap: "break-word" }} className="wrap">
           {notice.value}
         </div>
-        <button onClick={deleteNotice} className="absolute -top-1 right-1">
-          x
-        </button>
+        <CloseIcon onClick={deleteNotice} className="w-3 h-3 cursor-pointer absolute top-[2px] right-[2px]" />
       </div>
     </div>
   );

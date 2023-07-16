@@ -21,9 +21,9 @@ const example = {
   ),
 };
 
-let keyCounter = 0;
 export const NoticeContext = createContext<{ addNotice: (data: noticeType) => void }>({ addNotice: (arg) => {} });
 
+let keyCounter = 0;
 export const NoticeProvider = ({ children }: { children: JSX.Element }) => {
   const [notifications, setNotifications] = useState<storeNoticeType[]>([example]);
 

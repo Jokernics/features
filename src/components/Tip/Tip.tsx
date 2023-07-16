@@ -1,46 +1,27 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type cords = { top: number; left: number };
 
 export interface tipProps {
   children: JSX.Element;
-  tipText: string | JSX.Element;
+  tipContent: string | JSX.Element;
+  manualOpen?: boolean
   gapX?: number;
   gapY?: number;
-  containerClass?: string;
 }
 
-export default function Tip({ children, tipText, gapX = 0, gapY = 5, containerClass = "" }: tipProps) {
+export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOpen }: tipProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [cords, setCords] = useState<cords | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>()
 
   useLayoutEffect(() => {
     if (!isMounted || !tipRef.current || !contentRef.current || !(contentRef.current.firstChild instanceof HTMLElement)) return;
-    const getContent = (node: HTMLElement): HTMLElement | null => {
-      const child = node.firstChild;
-      let result = null;
 
-      if (child instanceof HTMLElement) {
-        const styles = getComputedStyle(child);
-
-        if (styles.display === "contents") {
-          result = getContent(child);
-        } else {
-          result = child;
-        }
-      }
-
-      return result;
-    };
-
-    const contentElement = getContent(contentRef.current);
-
-    if (!contentElement) return;
-
-    const contentMetrics = contentElement.getBoundingClientRect();
+    const contentMetrics = contentRef.current.getBoundingClientRect();
     const tipMetrics = tipRef.current.getBoundingClientRect();
 
     let topPosition = contentMetrics.top - tipMetrics.height - gapY;
@@ -66,25 +47,54 @@ export default function Tip({ children, tipText, gapX = 0, gapY = 5, containerCl
   }, [isMounted]);
 
   const handleContentMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (manualOpen !== undefined || !contentRef.current || (event.target instanceof Node && !contentRef.current.contains(event.target))) return
+
     setIsMounted(true);
   };
 
-  const handleTipMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {};
+  const handleTipMouseEnter = () => {
+    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
+  }
 
   const handleContentMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setIsMounted(false);
+    if (manualOpen !== undefined) return
+
+    closeTip();
   };
 
   const handleTipMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setIsMounted(false);
+    if (manualOpen !== undefined) return
+
+    closeTip();
   };
+
+  const handleContentMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (manualOpen !== undefined) return
+
+    closeTip();
+  };
+
+  const closeTip = () => {
+    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
+
+    hoverOutTimer.current = setTimeout(() => {
+      setIsMounted(false)
+    }, 50);
+  }
+
+  useEffect(() => {
+    if (manualOpen !== undefined) setIsMounted(manualOpen)
+  }, [manualOpen])
+
+
 
   return (
     <>
       <div
         onMouseEnter={handleContentMouseEnter}
         onMouseLeave={handleContentMouseLeave}
-        className={`contents ${containerClass}`}
+        onMouseDown={handleContentMouseDown}
+        className={`flex flex-1 tip-container`}
         ref={contentRef}
       >
         {children}
@@ -103,7 +113,7 @@ export default function Tip({ children, tipText, gapX = 0, gapY = 5, containerCl
             onMouseEnter={handleTipMouseEnter}
             onMouseLeave={handleTipMouseLeave}
           >
-            <h5 className="tipText-center">{tipText}</h5>
+            <h5 className="tipContent-center">{tipContent}</h5>
           </div>,
           document.body
         )}

@@ -9,14 +9,16 @@ export default function TipExample() {
         { str: "Пони зеленый", color: "green" },
         { str: "Пони крассный", color: "red" },
         { str: "Пони синий", color: "blue" },
-      ].map((obj) => {
+      ].map((obj, i) => {
         return (
-          <Tip tipText="Текст подсказки">
-            <div className="contents">
-              <span style={{ backgroundColor: obj.color }} className="flex-1">
-                {obj.str}
-              </span>
-            </div>
+          <Tip tipContent='sdf' key={i}>
+            <ConfirmDialog  >
+              <div className="contents">
+                <span style={{ backgroundColor: obj.color }} className="flex-1">
+                  {obj.str}
+                </span>
+              </div>
+            </ConfirmDialog>
           </Tip>
         );
       })}
