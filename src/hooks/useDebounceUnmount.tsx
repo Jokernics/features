@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useDebounceUnmount({ opened, animation_time = 200 }: { opened: boolean; animation_time?: number }) {
+export function useDebounceUnmount({ opened, delay = 200 }: { opened: boolean; delay?: number }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -8,10 +8,10 @@ export function useDebounceUnmount({ opened, animation_time = 200 }: { opened: b
       setMounted(true);
     } else if (!opened && mounted) {
       setTimeout(() => {
-        setMounted(false)
-      }, animation_time);
+        setMounted(false);
+      }, delay);
     }
-  }, [animation_time, mounted, opened]);
+  }, [delay, mounted, opened]);
 
   return { mounted };
 }

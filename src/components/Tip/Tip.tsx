@@ -6,7 +6,7 @@ type cords = { top: number; left: number };
 export interface tipProps {
   children: JSX.Element;
   tipContent: string | JSX.Element;
-  manualOpen?: boolean
+  manualOpen?: boolean;
   gapX?: number;
   gapY?: number;
 }
@@ -16,7 +16,7 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOp
   const [cords, setCords] = useState<cords | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>()
+  const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useLayoutEffect(() => {
     if (!isMounted || !tipRef.current || !contentRef.current || !(contentRef.current.firstChild instanceof HTMLElement)) return;
@@ -47,46 +47,49 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOp
   }, [isMounted]);
 
   const handleContentMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (manualOpen !== undefined || !contentRef.current || (event.target instanceof Node && !contentRef.current.contains(event.target))) return
+    if (
+      manualOpen !== undefined ||
+      !contentRef.current ||
+      (event.target instanceof Node && !contentRef.current.contains(event.target))
+    )
+      return;
 
     setIsMounted(true);
   };
 
   const handleTipMouseEnter = () => {
-    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
-  }
+    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current);
+  };
 
   const handleContentMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (manualOpen !== undefined) return
+    if (manualOpen !== undefined) return;
 
     closeTip();
   };
 
   const handleTipMouseLeave = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (manualOpen !== undefined) return
+    if (manualOpen !== undefined) return;
 
     closeTip();
   };
 
   const handleContentMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (manualOpen !== undefined) return
+    if (manualOpen !== undefined) return;
 
     closeTip();
   };
 
   const closeTip = () => {
-    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
+    if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current);
 
     hoverOutTimer.current = setTimeout(() => {
-      setIsMounted(false)
+      setIsMounted(false);
     }, 50);
-  }
+  };
 
   useEffect(() => {
-    if (manualOpen !== undefined) setIsMounted(manualOpen)
-  }, [manualOpen])
-
-
+    if (manualOpen !== undefined) setIsMounted(manualOpen);
+  }, [manualOpen]);
 
   return (
     <>
@@ -94,7 +97,7 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOp
         onMouseEnter={handleContentMouseEnter}
         onMouseLeave={handleContentMouseLeave}
         onMouseDown={handleContentMouseDown}
-        className={`flex flex-1 tip-container`}
+        className={`flex flex-1`}
         ref={contentRef}
       >
         {children}
@@ -113,7 +116,7 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOp
             onMouseEnter={handleTipMouseEnter}
             onMouseLeave={handleTipMouseLeave}
           >
-            <h5 className="tipContent-center">{tipContent}</h5>
+            <div className="contents">{tipContent}</div>
           </div>,
           document.body
         )}

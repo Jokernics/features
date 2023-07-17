@@ -1,38 +1,45 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Tip, { tipProps } from "./Tip";
+import { useWindowEvent } from "../../hooks/useWindowEvent";
 
-interface ConfirmDialogProps extends Omit<tipProps, 'tipContent'> { }
+interface ConfirmDialogProps extends Omit<tipProps, "tipContent"> {}
 
 export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const closeTip = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleMouseClickOnContent = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    setIsOpen(true)
-  }
+    setIsOpen(true);
+  };
 
   const onSuccess = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
-    closeTip()
-  }
+    closeTip();
+  };
 
   const onReject = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
-    closeTip()
-  }
+    closeTip();
+  };
 
+  useWindowEvent("mousedown", (e) => {
+    if (contentRef.current && e.target instanceof Node && !contentRef.current.contains(e.target)) {
+      closeTip();
+    }
+  });
 
   return (
     <div className="flex flex-1" onClick={handleMouseClickOnContent}>
       <Tip
         manualOpen={isOpen}
         tipContent={
-          <div className="flex flex-col">
+          <div ref={contentRef} className="flex flex-col">
             <h5>Подтвердите действие</h5>
             <div className="flex">
               <button onClick={onReject}>Нет</button>
@@ -40,7 +47,8 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
             </div>
           </div>
         }
-        {...tipProps}>
+        {...tipProps}
+      >
         {children}
       </Tip>
     </div>
