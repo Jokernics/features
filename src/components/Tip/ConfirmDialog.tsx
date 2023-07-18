@@ -39,8 +39,8 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
       <Tip
         manualOpen={isOpen}
         tipContent={
-          <div ref={contentRef} className="flex flex-col">
-            <h5>Подтвердите действие</h5>
+          <div ref={contentRef} className="flex flex-col w-fit items-center ">
+            <h5 className="whitespace-nowrap">Подтвердите действие</h5>
             <div className="flex">
               <button onClick={onReject}>Нет</button>
               <button onClick={onSuccess}>Да</button>

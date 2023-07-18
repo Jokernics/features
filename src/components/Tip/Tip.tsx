@@ -19,24 +19,23 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, manualOp
   const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useLayoutEffect(() => {
-    if (!isMounted || !tipRef.current || !contentRef.current || !(contentRef.current.firstChild instanceof HTMLElement)) return;
+    if (!isMounted || !tipRef.current || !contentRef.current) return;
 
     const contentMetrics = contentRef.current.getBoundingClientRect();
-    const tipMetrics = tipRef.current.getBoundingClientRect();
 
-    let topPosition = contentMetrics.top - tipMetrics.height - gapY;
-    let leftPosition = contentMetrics.left + contentMetrics.width / 2 - tipMetrics.width / 2 + gapX;
+    let topPosition = contentMetrics.top - tipRef.current.offsetHeight - gapY;
+    let leftPosition = contentMetrics.left + contentRef.current.offsetWidth / 2 - tipRef.current.offsetWidth / 2 + gapX;
 
     if (topPosition < 0) {
-      topPosition = contentMetrics.top + tipMetrics.height;
-    } else if (topPosition + tipMetrics.height > window.innerHeight) {
+      topPosition = contentMetrics.top + tipRef.current.offsetHeight;
+    } else if (topPosition + tipRef.current.offsetHeight > window.innerHeight) {
       topPosition = contentMetrics.top - tipRef.current.offsetHeight;
     }
 
     if (leftPosition < 0) {
       leftPosition = 0;
     } else if (leftPosition + tipRef.current.offsetWidth > window.innerWidth) {
-      leftPosition = window.innerWidth - tipMetrics.width;
+      leftPosition = window.innerWidth - tipRef.current.offsetWidth;
     }
 
     setCords({

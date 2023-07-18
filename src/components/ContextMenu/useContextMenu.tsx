@@ -79,7 +79,7 @@ export const useContextMenu = () => {
                   top: menuCords?.top,
                   left: menuCords?.left,
                   position: "fixed",
-                  zIndex: "10",
+                  zIndex: "1",
                   display: "block",
                 }}
                 className={className}
