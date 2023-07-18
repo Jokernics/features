@@ -35,12 +35,6 @@ export default function TipExample() {
         }}
       >
         <TipPositionHelper
-          // tipTop={({ contentEl, contentMetrics, tipEl }) => {
-          //   return contentMetrics.top + tipEl.offsetHeight - 5;
-          // }}
-          // tipLeft={({ contentEl, contentMetrics, tipEl }) => {
-          //   return contentMetrics.left + contentEl.offsetWidth;
-          // }}
           isOpen={isTipPositionOpen}
           tip={<div>Tip</div>}
         >

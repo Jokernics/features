@@ -1,6 +1,7 @@
 import "./App.css";
 import ButtonExample from "./components/Examples/ButtonExample";
 import ContextMenuExample from "./components/Examples/ContextMenuExample";
+import ContextMenuExample2 from "./components/Examples/ContextMenuExample2";
 import FileInputExample from "./components/Examples/FileInputExample";
 import ImageWithZoomExample from "./components/Examples/ImageWithZoomExample";
 import NoticeExample from "./components/Examples/NoticeExample";
@@ -17,6 +18,7 @@ function App() {
         <ContextMenuExample />
         <TipExample />
         <FileInputExample />
+        <ContextMenuExample2 />
       </div>
     </NoticeProvider>
   );

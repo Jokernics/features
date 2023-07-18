@@ -109,7 +109,7 @@ export default function ImageWithZoomModalView({
           <div
             ref={contanerRef}
             onClick={onContainerClick}
-            className={`modal ${!isModalView ? "hidden" : ""}`.trim()}
+            className={`modal z-[1] ${!isModalView ? "hidden" : ""}`.trim()}
             onWheel={onMouseWheel}
             onMouseMove={onMouseMove}
           >

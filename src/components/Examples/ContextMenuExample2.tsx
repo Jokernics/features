@@ -1,7 +1,8 @@
-import { useContextMenu } from "../ContextMenu/useContextMenu";
+import { useContextMenu2 } from "../ContextMenu/useContextMenu2";
 
-export default function ContextMenuExample() {
-  const { ContextMenuWrapper, ContextMenuTrigger, MenuItem, triggerData } = useContextMenu();
+export default function ContextMenuExample2() {
+  const { ContextMenuWrapper, ContextMenuTrigger, MenuItem, triggerData } = useContextMenu2();
+
   // create and style your context menu
   const ContextMenu = () => {
     return (
@@ -12,7 +13,9 @@ export default function ContextMenuExample() {
             onClick={() => {
               console.log(`Detect click on`, triggerData);
               const target = triggerData.event?.target as HTMLElement;
-              console.log(target.getBoundingClientRect());
+              if (target) {
+                console.log(target.getBoundingClientRect());
+              }
             }}
             className="cursor-pointer"
           >

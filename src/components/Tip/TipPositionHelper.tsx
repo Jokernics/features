@@ -7,14 +7,16 @@ interface Cords {
   left: number;
 }
 
-type elements = { tipEl: HTMLDivElement; contentEl: HTMLDivElement; contentMetrics: DOMRect };
+type elements = { tipEl: HTMLDivElement; contentEl: HTMLDivElement; contentMetrics: DOMRect, prevCords: Cords };
 
 interface TipPositionHelperProps {
   tip: JSX.Element;
   children: JSX.Element;
-  tipTop?: (({ tipEl, contentEl, contentMetrics }: elements) => number) | null;
-  tipLeft?: (({ tipEl, contentEl }: elements) => number) | null;
-  onTopOverflow?: (({ tipEl, contentEl, contentMetrics }: elements) => Cords) | null;
+  customCords?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null)
+  onTopOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
+  onBottomOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
+  onLeftOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
+  onRightOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
   isOpen: boolean;
   gapX?: number;
   gapY?: number;
@@ -24,8 +26,11 @@ interface TipPositionHelperProps {
 export default function TipPositionHelper({
   tip,
   children,
-  tipTop = null,
-  tipLeft = null,
+  customCords: getCustomCords,
+  onTopOverflow,
+  onBottomOverflow,
+  onLeftOverflow,
+  onRightOverflow,
   isOpen,
   gapX = 0,
   gapY = 5,
@@ -39,40 +44,43 @@ export default function TipPositionHelper({
   useLayoutEffect(() => {
     if (!mounted || !tipRef.current || !contentRef.current) return;
 
-    const contentEl = contentRef.current;
     const tipEl = tipRef.current;
-    const contentMetrics = contentRef.current.getBoundingClientRect();
+    const contentEl = contentRef.current;
 
-    const defaultTopPosition = contentMetrics.top - tipRef.current.offsetHeight - gapY;
-    const defaultLeftPosition = contentMetrics.left + contentRef.current.offsetWidth / 2 - tipRef.current.offsetWidth / 2 + gapX;
+    const contentMetrics = contentEl.getBoundingClientRect();
+
+    const defaultTopPosition = contentMetrics.top - tipEl.offsetHeight - gapY;
+    const defaultLeftPosition = contentMetrics.left + contentEl.offsetWidth / 2 - tipEl.offsetWidth / 2 + gapX;
 
     let newCords = { top: defaultTopPosition, left: defaultLeftPosition };
 
-    if (tipTop) newCords.top = tipTop({ tipEl, contentEl, contentMetrics });
-    if (tipLeft) newCords.left = tipLeft({ tipEl, contentEl, contentMetrics });
+    const customCords = getCustomCords && getCustomCords({ tipEl, contentEl, contentMetrics, prevCords: newCords })
+    if (customCords) newCords = customCords
 
     //check Boundaries
     let { top, left } = newCords;
 
-    const isTopOverflow = top < 0;
-    const isBottomOverflow = top + tipRef.current.offsetHeight > window.innerHeight;
-    const isLeftOverflow = left < 0;
-    const isRightOverflow = left + tipRef.current.offsetWidth > window.innerWidth;
-    console.log("isTopOverflow", isTopOverflow);
-    console.log("isBottomOverflow", isBottomOverflow);
-    console.log("isLeftOverflow", isLeftOverflow);
-    console.log("isRightOverflow", isRightOverflow);
+    const customPrms = { contentEl, contentMetrics, tipEl, prevCords: { ...newCords } }
 
-    if (top < 0) {
-      top = contentMetrics.top + tipRef.current.offsetHeight;
-    } else if (top + tipRef.current.offsetHeight > window.innerHeight) {
-      top = contentMetrics.top - tipRef.current.offsetHeight;
+    const isTopOverflow = top < 0;
+    const isBottomOverflow = top + tipEl.offsetHeight > window.innerHeight;
+    const isLeftOverflow = left < 0;
+    const isRightOverflow = left + tipEl.offsetWidth > window.innerWidth;
+
+    if (isTopOverflow) {
+      const newTop = contentMetrics.top + tipEl.offsetHeight;
+      top = (onTopOverflow && onTopOverflow(customPrms)?.top) || newTop
+    } else if (isBottomOverflow) {
+      const newTop = contentMetrics.top - tipEl.offsetHeight;
+      top = (onBottomOverflow && onBottomOverflow(customPrms)?.top) || newTop
     }
 
-    if (left < 0) {
-      left = 0;
-    } else if (left + tipRef.current.offsetWidth > window.innerWidth) {
-      left = window.innerWidth - tipRef.current.offsetWidth;
+    if (isLeftOverflow) {
+      const newLeft = 0;
+      left = (onLeftOverflow && onLeftOverflow(customPrms)?.left) || newLeft
+    } else if (isRightOverflow) {
+      const newLeft = window.innerWidth - tipEl.offsetWidth;
+      left = (onRightOverflow && onRightOverflow(customPrms)?.left) || newLeft
     }
 
     setCords({
