@@ -19,7 +19,7 @@ export const useContextMenu = () => {
     event: null,
     data: null,
   });
-  
+
   const handleOpen = () => {
     setIsMounted(true);
   };

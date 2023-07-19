@@ -34,10 +34,7 @@ export default function TipExample() {
           setIsTipPositionOpen(true);
         }}
       >
-        <TipPositionHelper
-          isOpen={isTipPositionOpen}
-          tip={<div>Tip</div>}
-        >
+        <TipPositionHelper isOpen={isTipPositionOpen} tip={<div>Tip</div>}>
           <span>TipPositionHelperProps</span>
         </TipPositionHelper>
       </div>

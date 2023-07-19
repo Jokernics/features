@@ -1,115 +1,131 @@
 import React, { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import TipPositionHelper from "../Tip/TipPositionHelper";
+import "./index.css";
+import { useEvent } from "../../hooks/useEvent";
 
 type triggerData = { event: React.MouseEvent<HTMLElement, MouseEvent> | null; data: any | null };
 type ContextMenuWrapper = { className?: string; children: ReactElement };
 type MenuItem = {
-	className?: string;
-	children: ReactElement;
-	onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  className?: string;
+  children: ReactElement;
+  onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 type ContextMenuTrigger = { children: ReactElement; data?: any };
 
 export const useContextMenu2 = () => {
-	const [isOpen, setIsOpen] = useState(false);
-	const menuRef = useRef<HTMLDivElement | null>(null);
-	const triggerData = useRef<triggerData>({
-		event: null,
-		data: null,
-	});
+  const [isOpen, setIsOpen] = useState(false);
+  const [animation, setAnimation] = useState("");
 
-	const handleOpen = () => {
-		setIsOpen(true);
-	};
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const triggerData = useRef<triggerData>({
+    event: null,
+    data: null,
+  });
 
-	const hide = () => {
-		setIsOpen(false);
-		triggerData.current.data = null;
-		triggerData.current.event = null;
-	};
+  const handleOpen = () => {
+    setAnimation("");
+    setIsOpen(true);
+  };
 
-	const ContextMenuWrapper = useCallback(
-		({ className, children }: ContextMenuWrapper) => {
-			return (
-				<TipPositionHelper
-					isOpen={isOpen}
-					tip={<div ref={menuRef}>{children}</div>}
-					customCords={() => {
-						const event = triggerData.current.event;
+  const close = useCallback(() => {
+    setAnimation("fadeOut");
+  }, []);
 
-						if (!event) return { top: 0, left: 0 }
+  const unMount = useCallback(() => {
+    setIsOpen(false);
+    triggerData.current.data = null;
+    triggerData.current.event = null;
+  }, []);
 
-						const clickX = event.clientX;
-						const clickY = event.clientY;
+  const handleAnimationEnd = useCallback(
+    (e: React.AnimationEvent<HTMLDivElement>) => {
+      if (e.animationName === "fadeOut") {
+        unMount();
+      }
+    },
+    [unMount]
+  );
 
-						return { left: clickX, top: clickY }
-					}}
-					onBottomOverflow={({ prevCords, tipEl }) => {
-						return { ...prevCords, top: window.innerHeight - tipEl.offsetHeight }
-					}}
-				>
-					{<div className="contents"></div>}
-				</TipPositionHelper>
+  const ContextMenuWrapper = useCallback(
+    ({ className, children }: ContextMenuWrapper) => {
+      return (
+        <TipPositionHelper
+          isOpen={isOpen}
+          tip={
+            <div onAnimationEnd={handleAnimationEnd} ref={menuRef} className={`${animation}`}>
+              {children}
+            </div>
+          }
+          customCords={() => {
+            const event = triggerData.current.event;
 
-			);
-		},
-		[isOpen]
-	);
+            if (!event) return { top: 0, left: 0 };
 
-	const MenuItem = useCallback(({ className, onClick, children }: MenuItem) => {
-		return (
-			<div
-				{...{ className }}
-				onClick={(e) => {
-					onClick && onClick(e);
-					hide();
-				}}
-			>
-				{children}
-			</div>
-		);
-	}, []);
+            const clickX = event.clientX;
+            const clickY = event.clientY;
 
-	const ContextMenuTrigger = useCallback(({ children, data }: ContextMenuTrigger) => {
-		return (
-			<div
-				className="contents"
-				onContextMenu={(event) => {
-					event.preventDefault();
+            return { left: clickX, top: clickY };
+          }}
+        />
+      );
+    },
+    [isOpen, handleAnimationEnd, animation]
+  );
 
-					triggerData.current.event = event;
-					if (data) triggerData.current.data = data;
+  const MenuItem = useCallback(({ className, onClick, children }: MenuItem) => {
+    return (
+      <div
+        {...{ className }}
+        onClick={(e) => {
+          onClick && onClick(e);
+          setAnimation("fadeOut");
+        }}
+      >
+        {children}
+      </div>
+    );
+  }, []);
 
-					handleOpen();
-				}}
-			>
-				{children}
-			</div>
-		);
-	}, []);
+  const ContextMenuTrigger = useCallback(({ children, data }: ContextMenuTrigger) => {
+    return (
+      <div
+        className="contents"
+        onContextMenu={(event) => {
+          event.preventDefault();
 
-	useEffect(() => {
-		const handleClick = (event: MouseEvent) => {
-			const target = event.target;
+          triggerData.current.event = event;
+          if (data) triggerData.current.data = data;
 
-			if (target instanceof Node && menuRef.current) {
-				const isOnMenu = menuRef.current.contains(target);
+          handleOpen();
+        }}
+      >
+        {children}
+      </div>
+    );
+  }, []);
 
-				if (!isOnMenu) hide();
-			}
-		};
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target;
 
-		window.addEventListener("mousedown", handleClick);
+      if (target instanceof Node && menuRef.current) {
+        const isOnMenu = menuRef.current.contains(target);
 
-		return () => window.removeEventListener("mousedown", handleClick);
-	}, []);
+        if (!isOnMenu) close();
+      }
+    };
 
-	return {
-		ContextMenuTrigger,
-		ContextMenuWrapper,
-		MenuItem,
-		triggerData: triggerData.current,
-		isOpen,
-		hide,
-	};
+    window.addEventListener("mousedown", handleClick);
+
+    return () => window.removeEventListener("mousedown", handleClick);
+  }, [close]);
+
+  return {
+    ContextMenuTrigger,
+    ContextMenuWrapper,
+    MenuItem,
+    triggerData: triggerData.current,
+    isOpen,
+    close,
+  };
 };

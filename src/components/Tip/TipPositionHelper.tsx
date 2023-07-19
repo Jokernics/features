@@ -1,26 +1,49 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import Portal from "../Portal";
-import { useDebounceUnmount } from "../../hooks/useDebounceUnmount";
 
 interface Cords {
   top: number;
   left: number;
 }
 
-type elements = { tipEl: HTMLDivElement; contentEl: HTMLDivElement; contentMetrics: DOMRect, prevCords: Cords };
+interface CustomCordsPrms {
+  tipEl: HTMLDivElement;
+  contentEl: HTMLDivElement;
+  contentMetrics: DOMRect;
+  defaultCords: Cords;
+}
+type CustomCordsPrmsWithoutChildren = Pick<CustomCordsPrms, "tipEl">;
 
-interface TipPositionHelperProps {
+type CustomCordsFunction = ({ tipEl, contentEl, contentMetrics, defaultCords }: CustomCordsPrms) => Cords;
+type CustomCordsFunctionWithoutChildren = ({ tipEl }: CustomCordsPrmsWithoutChildren) => Cords;
+
+type OverflowFunction = ({ tipEl, contentEl, contentMetrics, defaultCords }: CustomCordsPrms) => number;
+type OverflowFunctionWithoutChildren = ({ tipEl }: CustomCordsPrmsWithoutChildren) => number;
+
+interface Props {
   tip: JSX.Element;
   children: JSX.Element;
-  customCords?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null)
-  onTopOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
-  onBottomOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
-  onLeftOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
-  onRightOverflow?: (({ tipEl, contentEl, contentMetrics, prevCords }: elements) => Cords | null) | null;
+  customCords?: CustomCordsFunction;
+  onTopOverflow?: OverflowFunction;
+  onBottomOverflow?: OverflowFunction;
+  onLeftOverflow?: OverflowFunction;
+  onRightOverflow?: OverflowFunction;
   isOpen: boolean;
   gapX?: number;
   gapY?: number;
-  unmountDelay?: number;
+}
+
+interface PropsWithoutChildren {
+  tip: JSX.Element;
+  children?: undefined;
+  customCords: CustomCordsFunctionWithoutChildren;
+  onTopOverflow?: OverflowFunctionWithoutChildren;
+  onBottomOverflow?: OverflowFunctionWithoutChildren;
+  onLeftOverflow?: OverflowFunctionWithoutChildren;
+  onRightOverflow?: OverflowFunctionWithoutChildren;
+  isOpen: boolean;
+  gapX?: number;
+  gapY?: number;
 }
 
 export default function TipPositionHelper({
@@ -34,68 +57,96 @@ export default function TipPositionHelper({
   isOpen,
   gapX = 0,
   gapY = 5,
-  unmountDelay = 0,
-}: TipPositionHelperProps) {
+}: Props | PropsWithoutChildren) {
   const [cords, setCords] = useState<Cords | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const { mounted } = useDebounceUnmount({ opened: isOpen, delay: unmountDelay });
 
   useLayoutEffect(() => {
-    if (!mounted || !tipRef.current || !contentRef.current) return;
+    if (!isOpen || !tipRef.current) return;
 
     const tipEl = tipRef.current;
     const contentEl = contentRef.current;
 
-    const contentMetrics = contentEl.getBoundingClientRect();
+    const getOverflowStatus = (cords: Cords) => {
+      const isTopOverflow = cords.top < 0;
+      const isBottomOverflow = cords.top + tipEl.offsetHeight > window.innerHeight;
+      const isLeftOverflow = cords.left < 0;
+      const isRightOverflow = cords.left + tipEl.offsetWidth > window.innerWidth;
 
-    const defaultTopPosition = contentMetrics.top - tipEl.offsetHeight - gapY;
-    const defaultLeftPosition = contentMetrics.left + contentEl.offsetWidth / 2 - tipEl.offsetWidth / 2 + gapX;
+      return { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow };
+    };
 
-    let newCords = { top: defaultTopPosition, left: defaultLeftPosition };
+    // if content is missing
+    if (children === undefined) {
+      let newCords = getCustomCords({ tipEl });
 
-    const customCords = getCustomCords && getCustomCords({ tipEl, contentEl, contentMetrics, prevCords: newCords })
-    if (customCords) newCords = customCords
+      //check Boundaries
+      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(newCords);
+      const customPrms = { tipEl };
 
-    //check Boundaries
-    let { top, left } = newCords;
+      if (isTopOverflow) {
+        const defaultNewTop = tipEl.offsetHeight;
+        newCords.top = (onTopOverflow && onTopOverflow(customPrms)) || defaultNewTop;
+      } else if (isBottomOverflow) {
+        const defaultNewTop = window.innerHeight - tipEl.offsetHeight;
+        newCords.top = (onBottomOverflow && onBottomOverflow(customPrms)) || defaultNewTop;
+      }
 
-    const customPrms = { contentEl, contentMetrics, tipEl, prevCords: { ...newCords } }
+      if (isLeftOverflow) {
+        const defaultNewLeft = 0;
+        newCords.left = (onLeftOverflow && onLeftOverflow(customPrms)) || defaultNewLeft;
+      } else if (isRightOverflow) {
+        const defaultNewLeft = window.innerWidth - tipEl.offsetWidth;
+        newCords.left = (onRightOverflow && onRightOverflow(customPrms)) || defaultNewLeft;
+      }
 
-    const isTopOverflow = top < 0;
-    const isBottomOverflow = top + tipEl.offsetHeight > window.innerHeight;
-    const isLeftOverflow = left < 0;
-    const isRightOverflow = left + tipEl.offsetWidth > window.innerWidth;
+      setCords(newCords);
+    } else if (contentEl) {
+      const contentMetrics = contentEl.getBoundingClientRect();
 
-    if (isTopOverflow) {
-      const newTop = contentMetrics.top + tipEl.offsetHeight;
-      top = (onTopOverflow && onTopOverflow(customPrms)?.top) || newTop
-    } else if (isBottomOverflow) {
-      const newTop = contentMetrics.top - tipEl.offsetHeight;
-      top = (onBottomOverflow && onBottomOverflow(customPrms)?.top) || newTop
+      const defaultTopPosition = contentMetrics.top - tipEl.offsetHeight - gapY;
+      const defaultLeftPosition = contentMetrics.left + contentEl.offsetWidth / 2 - tipEl.offsetWidth / 2 + gapX;
+
+      let newCords = { top: defaultTopPosition, left: defaultLeftPosition };
+
+      const customCords = getCustomCords && getCustomCords({ tipEl, contentEl, contentMetrics, defaultCords: newCords });
+      if (customCords) newCords = customCords;
+
+      //check Boundaries
+      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(newCords);
+      const customPrms = { tipEl, contentEl, contentMetrics, defaultCords: newCords };
+
+      if (isTopOverflow) {
+        const newTop = contentMetrics.top + tipEl.offsetHeight;
+        newCords.top = (onTopOverflow && onTopOverflow(customPrms)) || newTop;
+      } else if (isBottomOverflow) {
+        const newTop = contentMetrics.top - tipEl.offsetHeight;
+        newCords.top = (onBottomOverflow && onBottomOverflow(customPrms)) || newTop;
+      }
+
+      if (isLeftOverflow) {
+        const newLeft = 0;
+        newCords.left = (onLeftOverflow && onLeftOverflow(customPrms)) || newLeft;
+      } else if (isRightOverflow) {
+        const newLeft = window.innerWidth - tipEl.offsetWidth;
+        newCords.left = (onRightOverflow && onRightOverflow(customPrms)) || newLeft;
+      }
+
+      setCords(newCords);
     }
 
-    if (isLeftOverflow) {
-      const newLeft = 0;
-      left = (onLeftOverflow && onLeftOverflow(customPrms)?.left) || newLeft
-    } else if (isRightOverflow) {
-      const newLeft = window.innerWidth - tipEl.offsetWidth;
-      left = (onRightOverflow && onRightOverflow(customPrms)?.left) || newLeft
-    }
-
-    setCords({
-      top: top,
-      left: left,
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted]);
+  }, [isOpen]);
 
   return (
     <>
-      <div className={`flex flex-1`} ref={contentRef}>
-        {children}
-      </div>
-      <Portal open={mounted}>
+      {children && (
+        <div className={`flex flex-1`} ref={contentRef}>
+          {children}
+        </div>
+      )}
+      <Portal open={isOpen}>
         <div
           style={{
             top: cords?.top,

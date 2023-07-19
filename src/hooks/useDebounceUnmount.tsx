@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useDebounceUnmount({ opened, delay = 200 }: { opened: boolean; delay?: number }) {
-  const [mounted, setMounted] = useState(opened);
+  const [mounted, setMounted] = useState(() => opened);
 
   useEffect(() => {
     if (opened && !mounted) {
