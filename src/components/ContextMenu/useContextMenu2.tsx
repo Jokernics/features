@@ -64,8 +64,9 @@ export const useContextMenu2 = () => {
             const clickX = event.clientX;
             const clickY = event.clientY;
 
-            return { left: clickX, top: clickY };
+            return { left: clickX + 3, top: clickY + 5 };
           }}
+          noContent
         />
       );
     },

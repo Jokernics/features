@@ -34,7 +34,13 @@ export default function TipExample() {
           setIsTipPositionOpen(true);
         }}
       >
-        <TipPositionHelper isOpen={isTipPositionOpen} tip={<div>Tip</div>}>
+        <TipPositionHelper 
+          isOpen={isTipPositionOpen} 
+          tip={<div>TipPositionHelperProps</div>}
+          customCords={({contentMetrics}) => {
+            return {top: contentMetrics.top, left: contentMetrics.left}
+          }}
+        >
           <span>TipPositionHelperProps</span>
         </TipPositionHelper>
       </div>

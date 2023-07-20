@@ -10,45 +10,64 @@ interface CustomCordsPrms {
   tipEl: HTMLDivElement;
   contentEl: HTMLDivElement;
   contentMetrics: DOMRect;
-  defaultCords: Cords;
+  cords: Cords;
 }
 type CustomCordsPrmsWithoutChildren = Pick<CustomCordsPrms, "tipEl">;
 
-type CustomCordsFunction = ({ tipEl, contentEl, contentMetrics, defaultCords }: CustomCordsPrms) => Cords;
+type CustomCordsFunction = ({ tipEl, contentEl, contentMetrics, cords }: CustomCordsPrms) => Cords;
 type CustomCordsFunctionWithoutChildren = ({ tipEl }: CustomCordsPrmsWithoutChildren) => Cords;
 
-type OverflowFunction = ({ tipEl, contentEl, contentMetrics, defaultCords }: CustomCordsPrms) => number;
-type OverflowFunctionWithoutChildren = ({ tipEl }: CustomCordsPrmsWithoutChildren) => number;
+type OverflowFunctionPrmsWithChildren = Omit<CustomCordsPrms, "prevCords">;
+type OverflowTopFunctionWithChildren = (prms: OverflowFunctionPrmsWithChildren & { overflowTop: number; cords: Cords }) => {
+  top: number;
+};
+type OverflowLeftFunctionWithChildren = (prms: OverflowFunctionPrmsWithChildren & { overflowLeft: number; cords: Cords }) => {
+  left: number;
+};
 
-interface Props {
-  tip: JSX.Element;
+type OverflowFunctionPrmsWithoutChildren = CustomCordsPrmsWithoutChildren;
+type OverflowTopFunctionWithoutChildren = (prms: OverflowFunctionPrmsWithoutChildren & { overflowTop: number; cords: Cords }) => {
+  top: number;
+};
+type OverflowLeftFunctionWithoutChildren = (
+  prms: OverflowFunctionPrmsWithoutChildren & { overflowLeft: number; cords: Cords }
+) => {
+  left: number;
+};
+
+type PropsWithChildren = {
+  noContent?: undefined;
   children: JSX.Element;
   customCords?: CustomCordsFunction;
-  onTopOverflow?: OverflowFunction;
-  onBottomOverflow?: OverflowFunction;
-  onLeftOverflow?: OverflowFunction;
-  onRightOverflow?: OverflowFunction;
-  isOpen: boolean;
+  onTopOverflow?: OverflowTopFunctionWithChildren;
+  onBottomOverflow?: OverflowTopFunctionWithChildren;
+  onLeftOverflow?: OverflowLeftFunctionWithChildren;
+  onRightOverflow?: OverflowLeftFunctionWithChildren;
   gapX?: number;
   gapY?: number;
-}
+};
 
 interface PropsWithoutChildren {
-  tip: JSX.Element;
+  noContent: true;
   children?: undefined;
   customCords: CustomCordsFunctionWithoutChildren;
-  onTopOverflow?: OverflowFunctionWithoutChildren;
-  onBottomOverflow?: OverflowFunctionWithoutChildren;
-  onLeftOverflow?: OverflowFunctionWithoutChildren;
-  onRightOverflow?: OverflowFunctionWithoutChildren;
-  isOpen: boolean;
-  gapX?: number;
-  gapY?: number;
+  onTopOverflow?: OverflowTopFunctionWithoutChildren;
+  onBottomOverflow?: OverflowTopFunctionWithoutChildren;
+  onLeftOverflow?: OverflowLeftFunctionWithoutChildren;
+  onRightOverflow?: OverflowLeftFunctionWithoutChildren;
+  gapX?: undefined;
+  gapY?: undefined;
 }
 
+type Props = {
+  tip: JSX.Element;
+  isOpen: boolean;
+} & (PropsWithChildren | PropsWithoutChildren);
+
 export default function TipPositionHelper({
-  tip,
+  noContent,
   children,
+  tip,
   customCords: getCustomCords,
   onTopOverflow,
   onBottomOverflow,
@@ -57,7 +76,7 @@ export default function TipPositionHelper({
   isOpen,
   gapX = 0,
   gapY = 5,
-}: Props | PropsWithoutChildren) {
+}: Props) {
   const [cords, setCords] = useState<Cords | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -78,62 +97,81 @@ export default function TipPositionHelper({
     };
 
     // if content is missing
-    if (children === undefined) {
-      let newCords = getCustomCords({ tipEl });
+    if (noContent) {
+      let cords = getCustomCords({ tipEl });
 
       //check Boundaries
-      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(newCords);
-      const customPrms = { tipEl };
+      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(cords);
+
+      const cordsWithOverflowCheck = JSON.parse(JSON.stringify(cords));
 
       if (isTopOverflow) {
-        const defaultNewTop = tipEl.offsetHeight;
-        newCords.top = (onTopOverflow && onTopOverflow(customPrms)) || defaultNewTop;
+        const overflowTop = tipEl.offsetHeight;
+        const customOverflowTop = onTopOverflow && onTopOverflow({ tipEl, cords, overflowTop }).top;
+
+        cordsWithOverflowCheck.top = customOverflowTop || overflowTop;
       } else if (isBottomOverflow) {
-        const defaultNewTop = window.innerHeight - tipEl.offsetHeight;
-        newCords.top = (onBottomOverflow && onBottomOverflow(customPrms)) || defaultNewTop;
+        const overflowTop = window.innerHeight - tipEl.offsetHeight;
+        const customOverflowTop = onBottomOverflow && onBottomOverflow({ tipEl, cords, overflowTop }).top;
+
+        cordsWithOverflowCheck.top = customOverflowTop || overflowTop;
       }
 
       if (isLeftOverflow) {
-        const defaultNewLeft = 0;
-        newCords.left = (onLeftOverflow && onLeftOverflow(customPrms)) || defaultNewLeft;
+        const overflowLeft = 0;
+        const customOverflowLeft = onLeftOverflow && onLeftOverflow({ tipEl, cords, overflowLeft }).left;
+
+        cordsWithOverflowCheck.left = customOverflowLeft || overflowLeft;
       } else if (isRightOverflow) {
-        const defaultNewLeft = window.innerWidth - tipEl.offsetWidth;
-        newCords.left = (onRightOverflow && onRightOverflow(customPrms)) || defaultNewLeft;
+        const overflowLeft = window.innerWidth - tipEl.offsetWidth;
+        const customOverflowLeft = onRightOverflow && onRightOverflow({ tipEl, cords, overflowLeft }).left;
+
+        cordsWithOverflowCheck.left = customOverflowLeft || overflowLeft;
       }
 
-      setCords(newCords);
-    } else if (contentEl) {
+      setCords(cordsWithOverflowCheck);
+      //if content exist
+    } else if (!noContent && contentEl) {
       const contentMetrics = contentEl.getBoundingClientRect();
 
       const defaultTopPosition = contentMetrics.top - tipEl.offsetHeight - gapY;
       const defaultLeftPosition = contentMetrics.left + contentEl.offsetWidth / 2 - tipEl.offsetWidth / 2 + gapX;
 
-      let newCords = { top: defaultTopPosition, left: defaultLeftPosition };
+      let cords = { top: defaultTopPosition, left: defaultLeftPosition };
 
-      const customCords = getCustomCords && getCustomCords({ tipEl, contentEl, contentMetrics, defaultCords: newCords });
-      if (customCords) newCords = customCords;
+      const customCords = getCustomCords && getCustomCords({ tipEl, contentEl, contentMetrics, cords });
+      if (customCords) cords = customCords;
+
+      const cordsWithOverflowCheck = JSON.parse(JSON.stringify(cords));
 
       //check Boundaries
-      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(newCords);
-      const customPrms = { tipEl, contentEl, contentMetrics, defaultCords: newCords };
+      const { isTopOverflow, isBottomOverflow, isLeftOverflow, isRightOverflow } = getOverflowStatus(cords);
 
       if (isTopOverflow) {
-        const newTop = contentMetrics.top + tipEl.offsetHeight;
-        newCords.top = (onTopOverflow && onTopOverflow(customPrms)) || newTop;
+        const overflowTop = contentMetrics.top + tipEl.offsetHeight;
+        const customOverflowTop = onTopOverflow && onTopOverflow({ contentEl, contentMetrics, tipEl, cords, overflowTop });
+
+        cordsWithOverflowCheck.top = customOverflowTop || overflowTop;
       } else if (isBottomOverflow) {
-        const newTop = contentMetrics.top - tipEl.offsetHeight;
-        newCords.top = (onBottomOverflow && onBottomOverflow(customPrms)) || newTop;
+        const overflowTop = contentMetrics.top - tipEl.offsetHeight;
+        const customOverflowTop = onBottomOverflow && onBottomOverflow({ contentEl, contentMetrics, tipEl, cords, overflowTop });
+
+        cordsWithOverflowCheck.top = customOverflowTop || overflowTop;
       }
 
       if (isLeftOverflow) {
-        const newLeft = 0;
-        newCords.left = (onLeftOverflow && onLeftOverflow(customPrms)) || newLeft;
+        const overflowLeft = 0;
+        const customOverflowLeft = onLeftOverflow && onLeftOverflow({ contentEl, contentMetrics, tipEl, cords, overflowLeft });
+
+        cordsWithOverflowCheck.left = customOverflowLeft || overflowLeft;
       } else if (isRightOverflow) {
-        const newLeft = window.innerWidth - tipEl.offsetWidth;
-        newCords.left = (onRightOverflow && onRightOverflow(customPrms)) || newLeft;
+        const overflowLeft = window.innerWidth - tipEl.offsetWidth;
+        const customOverflowLeft = onRightOverflow && onRightOverflow({ contentEl, contentMetrics, tipEl, cords, overflowLeft });
+
+        cordsWithOverflowCheck.left = customOverflowLeft || overflowLeft;
       }
 
-      setCords(newCords);
+      setCords(cordsWithOverflowCheck);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
