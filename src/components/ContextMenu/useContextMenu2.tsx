@@ -67,6 +67,7 @@ export const useContextMenu2 = () => {
             return { left: clickX + 3, top: clickY + 5 };
           }}
           noContent
+					children={<></>}
         />
       );
     },

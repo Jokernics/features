@@ -36,8 +36,8 @@ type OverflowLeftFunctionWithoutChildren = (
 };
 
 type PropsWithChildren = {
-  noContent?: undefined;
-  children: JSX.Element;
+  noContent?: false
+  children: JSX.Element
   customCords?: CustomCordsFunction;
   onTopOverflow?: OverflowTopFunctionWithChildren;
   onBottomOverflow?: OverflowTopFunctionWithChildren;
@@ -48,8 +48,8 @@ type PropsWithChildren = {
 };
 
 interface PropsWithoutChildren {
-  noContent: true;
-  children?: undefined;
+  noContent: true
+  children: JSX.Element;
   customCords: CustomCordsFunctionWithoutChildren;
   onTopOverflow?: OverflowTopFunctionWithoutChildren;
   onBottomOverflow?: OverflowTopFunctionWithoutChildren;
@@ -65,7 +65,6 @@ type Props = {
 } & (PropsWithChildren | PropsWithoutChildren);
 
 export default function TipPositionHelper({
-  noContent,
   children,
   tip,
   customCords: getCustomCords,
@@ -76,6 +75,7 @@ export default function TipPositionHelper({
   isOpen,
   gapX = 0,
   gapY = 5,
+  noContent
 }: Props) {
   const [cords, setCords] = useState<Cords | null>(null);
   const tipRef = useRef<HTMLDivElement | null>(null);
@@ -179,7 +179,7 @@ export default function TipPositionHelper({
 
   return (
     <>
-      {children && (
+      {!noContent && (
         <div className={`flex flex-1`} ref={contentRef}>
           {children}
         </div>
