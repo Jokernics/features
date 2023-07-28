@@ -21,9 +21,12 @@ const example = {
   ),
 };
 
-export const NoticeContext = createContext<{ addNotice: (data: noticeType) => void }>({ addNotice: (arg) => {} });
+type NoticeContextTypes = { addNotice: (data: noticeType) => void };
+
+export const NoticeContext = createContext<NoticeContextTypes>({ addNotice: (arg) => {} });
 
 let keyCounter = 0;
+const contextValue = {} as NoticeContextTypes;
 export const NoticeProvider = ({ children }: { children: JSX.Element }) => {
   const [notifications, setNotifications] = useState<storeNoticeType[]>([example]);
 
@@ -36,8 +39,10 @@ export const NoticeProvider = ({ children }: { children: JSX.Element }) => {
 
   const memoChildren = useMemo(() => children, [children]);
 
+  contextValue.addNotice = addNotice;
+
   return (
-    <NoticeContext.Provider value={{ addNotice }}>
+    <NoticeContext.Provider value={contextValue}>
       {memoChildren}
       <Notifications {...{ notifications, setNotifications }} />
     </NoticeContext.Provider>
