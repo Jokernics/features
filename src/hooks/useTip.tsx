@@ -37,9 +37,6 @@ export default function useTip({ tipText = "", gapX = 0, gapY = 0 }: propsType) 
     let arrowTop = contentMetrics.top - arrowSize - gapY;
     let arrowLeft = contentMetrics.left + contentRef.current.offsetWidth / 2 - arrowSize / 2 + gapX;
 
-    console.log(leftPosition + contentRef.current.offsetWidth / 2)
-    console.log(arrowLeft + arrowSize / 2)
-
     setIsRotateArrow(false);
 
     if (topPosition < 0) {

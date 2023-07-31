@@ -1,8 +1,17 @@
 import { useRef, useState } from "react";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
-import Tip, { tipProps } from "./Tip";
+import Tip from "./Tip";
 
-interface ConfirmDialogProps extends Omit<tipProps, "tipContent"> {}
+type propsType = {
+  children: JSX.Element;
+  tipContent: string | JSX.Element;
+  containerClassName?: string;
+  manualOpen?: boolean;
+  gapX?: number;
+  gapY?: number;
+};
+
+interface ConfirmDialogProps extends Omit<propsType, "tipContent"> {}
 
 export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
