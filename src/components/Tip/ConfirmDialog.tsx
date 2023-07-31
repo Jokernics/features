@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import Tip, { tipProps } from "./Tip";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
+import Tip, { tipProps } from "./Tip";
 
 interface ConfirmDialogProps extends Omit<tipProps, "tipContent"> {}
 

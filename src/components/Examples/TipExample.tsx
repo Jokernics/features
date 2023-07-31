@@ -1,13 +1,16 @@
 import { useState } from "react";
 import ConfirmDialog from "../Tip/ConfirmDialog";
 import TipPositionHelper from "../Tip/TipPositionHelper";
+import useTip from "../../hooks/useTip";
 
 export default function TipExample() {
   const [isTipPositionOpen, setIsTipPositionOpen] = useState(true);
 
+  const { Tip, contentRef } = useTip({ tipText: "23123123123" });
+
   return (
     <div className="flex flex-col">
-      <div className="flex">
+      {/* <div className="flex">
         <textarea className="resize-x" value={"22"} disabled />
         {[
           { str: "Пони зеленый", color: "green" },
@@ -24,8 +27,8 @@ export default function TipExample() {
             </ConfirmDialog>
           );
         })}
-      </div>
-      <div
+      </div> */}
+      {/* <div
         className="mt-8 w-fit"
         onMouseDown={() => {
           setIsTipPositionOpen(false);
@@ -48,7 +51,9 @@ export default function TipExample() {
         >
           <span>TipPositionHelpers</span>
         </TipPositionHelper>
-      </div>
+      </div> */}
+      <Tip />
+      <div ref={contentRef} style={{width: 103}} className=" bg-slate-300 w-fit ml-32">sdffsdf</div>
     </div>
   );
 }
