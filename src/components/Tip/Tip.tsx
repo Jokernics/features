@@ -1,5 +1,6 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useCombinedRef } from "../../hooks/useCombinedRef";
 
 type propsType = {
   children: JSX.Element;
@@ -18,7 +19,7 @@ type CordsType = {
 const arrowSize = 12;
 const windowGapX = 10;
 
-export default function Tip({ children, tipContent, gapX = 0, gapY = 5, containerClassName = "", manualOpen }: propsType) {
+export default forwardRef<HTMLDivElement, propsType>(function Tip({ children, tipContent, gapX = 0, gapY = 5, containerClassName = "", manualOpen }, containerRef) {
   const [isMounted, setIsMounted] = useState(false);
   const [cords, setCords] = useState<CordsType | null>(null);
   const [arrowCords, setArrowCords] = useState<CordsType | null>(null);
@@ -101,6 +102,8 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, containe
 
   const memoChildren = useMemo(() => children, [children])
 
+  const combinedContentRef = useCombinedRef(contentRef, containerRef)
+
   useEffect(() => {
     if (manualOpen !== undefined) setIsMounted(manualOpen);
   }, [manualOpen]);
@@ -112,7 +115,7 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, containe
         onMouseLeave={handleContentMouseLeave}
         onMouseDown={handleContentMouseDown}
         className={containerClassName}
-        ref={contentRef}
+        ref={combinedContentRef}
       >
         {memoChildren}
       </div>
@@ -126,9 +129,9 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, containe
                 position: "fixed",
                 zIndex: "1",
               }}
-              className="border-[#0284C7] bottom-1 w-fit h-fit flex flex-col items-center
-                rounded-lg shadow-lg px-2 py-1 text-gray-500 text-sm
-                bg-opacity-50 border-2 
+              className="border-lightblue bottom-1 w-fit h-fit flex flex-col items-center
+                rounded-lg shadow-lg px-2 py-1 text-white text-sm
+                bg-opacity-50 border-2 bg-lightblue
               "
               ref={tipRef}
               onMouseEnter={handleTipMouseEnter}
@@ -146,11 +149,11 @@ export default function Tip({ children, tipContent, gapX = 0, gapY = 5, containe
                 zIndex: "1",
                 rotate: isRotateArrow ? "180deg" : "",
               }}
-              className="w-0 h-0 border-[6px] border-solid border-transparent border-t-[#0284C7]"
+              className="w-0 h-0 border-[6px] border-solid border-transparent border-t-lightblue"
             />
           </div>,
           document.body
         )}
     </>
   );
-}
+})

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import Tip from "./Tip";
+import { useAddEventListener } from "../../hooks/useAddEventListener";
 
 type propsType = {
   children: JSX.Element;
@@ -11,7 +12,7 @@ type propsType = {
   gapY?: number;
 };
 
-interface ConfirmDialogProps extends Omit<propsType, "tipContent"> {}
+interface ConfirmDialogProps extends Omit<propsType, "tipContent"> { }
 
 export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
     setIsOpen(false);
   };
 
-  const handleMouseClickOnContent = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseClickOnContent = (event: MouseEvent) => {
     setIsOpen(true);
   };
 
@@ -43,9 +44,14 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
     }
   });
 
+  const myRef = useRef<HTMLDivElement>(null)
+
+  useAddEventListener(myRef, 'click', handleMouseClickOnContent)
+
   return (
-    <div className="flex flex-1" onClick={handleMouseClickOnContent}>
+    <div className="flex flex-1">
       <Tip
+        ref={myRef}
         manualOpen={isOpen}
         tipContent={
           <div ref={contentRef} className="flex flex-col w-fit items-center ">
