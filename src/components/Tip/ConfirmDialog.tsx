@@ -56,7 +56,7 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
         tipContent={
           <div ref={contentRef} className="flex flex-col w-fit items-center ">
             <h5 className="whitespace-nowrap">Подтвердите действие</h5>
-            <div className="flex">
+            <div className="flex gap-3">
               <button onClick={onReject}>Нет</button>
               <button onClick={onSuccess}>Да</button>
             </div>
