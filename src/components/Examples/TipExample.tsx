@@ -19,40 +19,21 @@ export default function TipExample() {
           { str: "Пони синий", color: "blue" },
         ].map((obj, i) => {
           return (
-            <ConfirmDialog key={i}>
-              <div className="contents">
-                <span style={{ backgroundColor: obj.color }} className="flex-1">
-                  {obj.str}
-                </span>
-              </div>
-            </ConfirmDialog>
+            <Tip 
+              key={i}
+              tipContent='Tip'
+            >
+              <ConfirmDialog key={i}>
+                <div className="contents">
+                  <span style={{ backgroundColor: obj.color }} className="flex-1">
+                    {obj.str}
+                  </span>
+                </div>
+              </ConfirmDialog>
+            </Tip>
           );
         })}
       </div>
-      {/* <div
-        className="mt-8 w-fit"
-        onMouseDown={() => {
-          setIsTipPositionOpen(false);
-        }}
-        onMouseUp={() => {
-          setIsTipPositionOpen(true);
-        }}
-      >
-        <button>CLICKCKCK</button>
-        <TipPositionHelper
-          isOpen={isTipPositionOpen}
-          tip={<div>TipPositionHelperProps</div>}
-          customCords={({ tipEl }) => {
-            return { top: tipEl.offsetHeight, left: tipEl.offsetLeft }
-          }}
-          // customCords={({ contentEl, tipEl, contentMetrics }) => {
-          //   return { top: contentMetrics.top - contentEl.offsetHeight, left: contentMetrics.left }
-          // }}
-          noContent
-        >
-          <span>TipPositionHelpers</span>
-        </TipPositionHelper>
-      </div> */}
       <Tip
         tipContent={'tip '}
         containerClassName="w-fit  ml-32"
@@ -61,7 +42,7 @@ export default function TipExample() {
           sdffsdf
         </div>
       </Tip
-     >
+      >
     </div>
   );
 }
