@@ -28,6 +28,5 @@ export function useResizeObserver(onResize: ResizeObserverCallback) {
     [attachResizeObserver, detachResizeObserver]
   );
 
-  return refCb;
-  // return useUniversalRef(refCb);
+  return useUniversalRef(refCb);
 }
