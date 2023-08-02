@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import { useWindowEvent } from "../../hooks/useWindowEvent";
 import Tip from "./Tip";
 import { useAddEventListener } from "../../hooks/useAddEventListener";
+import { useCombinedRef } from "../../hooks/useCombinedRef";
 
 type propsType = {
   children: JSX.Element;
@@ -14,7 +15,7 @@ type propsType = {
 
 interface ConfirmDialogProps extends Omit<propsType, "tipContent"> { }
 
-export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogProps) {
+export default forwardRef<HTMLDivElement, ConfirmDialogProps>(function ConfirmDialog({ children, ...tipProps }, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,12 +47,14 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
 
   const myRef = useRef<HTMLDivElement>(null)
 
+  const myRefComined = useCombinedRef(ref, myRef)
+
   useAddEventListener(myRef, 'click', handleMouseClickOnContent)
 
   return (
     <div className="flex flex-1">
       <Tip
-        ref={myRef}
+        ref={myRefComined}
         manualOpen={isOpen}
         tipContent={
           <div ref={contentRef} className="flex flex-col w-fit items-center ">
@@ -69,3 +72,4 @@ export default function ConfirmDialog({ children, ...tipProps }: ConfirmDialogPr
     </div>
   );
 }
+)
