@@ -8,10 +8,10 @@ import { useAddEventListener } from "../../hooks/useAddEventListener";
 export default function TipExample() {
   const [isTipPositionOpen, setIsTipPositionOpen] = useState(true);
 
-  const semeRef = useRef<HTMLDivElement>(null)
-  useAddEventListener(semeRef, 'click', () => {
-    console.log('click')
-  })
+  const semeRef = useRef<HTMLDivElement>(null);
+  useAddEventListener(semeRef, "click", () => {
+    console.log("click");
+  });
 
   return (
     <div className="flex flex-col">
@@ -22,29 +22,24 @@ export default function TipExample() {
           { str: "Пони крассный", color: "red" },
           { str: "Пони синий", color: "blue" },
         ].map((obj, i) => {
-          return ( 
-            <ConfirmDialog key={i} 
-              ref={semeRef}
-              containerClassName="flex flex-1"
-            >
-              <div className="contents">
-                <span style={{ backgroundColor: obj.color }} className="flex-1">
-                  {obj.str}
-                </span>
-              </div>
-            </ConfirmDialog>
+          return (
+            <Tip key={i} tipContent="Tip" containerClassName="flex flex-1">
+              <ConfirmDialog key={i} ref={semeRef} containerClassName="flex flex-1">
+                <div className="contents">
+                  <span style={{ backgroundColor: obj.color }} className="flex-1">
+                    {obj.str}
+                  </span>
+                </div>
+              </ConfirmDialog>
+            </Tip>
           );
         })}
       </div>
-      <Tip
-        tipContent={'tip '}
-        containerClassName="w-fit  ml-32"
-      >
+      <Tip tipContent={"tip "} containerClassName="w-fit  ml-32">
         <div style={{ width: 103 }} className=" bg-slate-300 w-fit">
           sdffsdf
         </div>
-      </Tip
-     >
+      </Tip>
     </div>
   );
 }
