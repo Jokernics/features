@@ -13,7 +13,7 @@ export default forwardRef<HTMLDivElement, props>(function Modal({ children, open
 
   return (
     <Portal open={mounted}>
-      <div ref={ref} className={`modal z-[1] ${!open ? "hidden" : ""}`.trim()} {...props}>
+      <div ref={ref} className={`modal z-[1] ${!open ? "modal-hidden" : ""}`.trim()} {...props}>
         {children}
       </div>
     </Portal>
