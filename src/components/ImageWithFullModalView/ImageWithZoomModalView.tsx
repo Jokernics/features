@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useRef } from "react";
-import { createPortal } from "react-dom";
-import "./index.css";
 import { ReactComponent as CloseIcon } from "./close-circle-outline.svg";
-import { useDebounceUnmount } from "../../hooks/useDebounceUnmount";
+import Modal from "../Modal/Modal";
 
 interface props extends React.HTMLProps<HTMLImageElement> {
   initialScale?: number;
@@ -28,7 +26,6 @@ export default function ImageWithZoomModalView({
   scrollScaleStep = 0.2,
 }: props) {
   const [isModalView, setIsModalView] = useState(false);
-  const { mounted } = useDebounceUnmount({ opened: isModalView });
   const [scale, setScale] = useState(initialScale);
   const [imageCords, setImageCords] = useState({ top: 0, left: 0 });
   const contanerRef = useRef<HTMLDivElement | null>(null);
@@ -104,36 +101,28 @@ export default function ImageWithZoomModalView({
 
   return (
     <>
-      {mounted &&
-        createPortal(
+      <Modal ref={contanerRef} onClick={onContainerClick} onWheel={onMouseWheel} onMouseMove={onMouseMove} open={isModalView}>
+        <>
+          <button ref={closeBtnRef} className="absolute top-1 right-1 cursor-pointer hover:scale-105 transition-all z-10">
+            <CloseIcon className="w-9 h-9 fill-brand-blue hover:fill-dark-blue" />
+          </button>
           <div
-            ref={contanerRef}
-            onClick={onContainerClick}
-            className={`modal z-[1] ${!isModalView ? "hidden" : ""}`.trim()}
-            onWheel={onMouseWheel}
-            onMouseMove={onMouseMove}
+            style={{
+              top: imageCords.top,
+              left: imageCords.left,
+              scale: `${scale}`,
+              transition: "scale 0.1s ease-out",
+            }}
+            className="relative"
+            draggable="false"
+            onMouseDown={onMouseDown}
+            onMouseUp={onMouseUp}
+            onClick={onModalImageClick}
           >
-            <button ref={closeBtnRef} className="absolute top-1 right-1 cursor-pointer hover:scale-105 transition-all z-10">
-              <CloseIcon className="w-9 h-9 fill-brand-blue hover:fill-dark-blue" />
-            </button>
-            <div
-              style={{
-                top: imageCords.top,
-                left: imageCords.left,
-                scale: `${scale}`,
-                transition: "scale 0.1s ease-out",
-              }}
-              className="relative"
-              draggable="false"
-              onMouseDown={onMouseDown}
-              onMouseUp={onMouseUp}
-              onClick={onModalImageClick}
-            >
-              <img draggable="false" className="select-none cursor-grabbing" src={src} alt={alt} />
-            </div>
-          </div>,
-          document.body
-        )}
+            <img draggable="false" className="select-none cursor-grabbing" src={src} alt={alt} />
+          </div>
+        </>
+      </Modal>
       <img onClick={handlePreviewClick} {...{ src, alt, style, className }} />
     </>
   );
