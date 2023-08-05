@@ -1,43 +1,56 @@
-import { useEffect } from "react";
-import { useEvent } from "./useEvent";
+import { useEffect, useId } from "react";
+import { useWindowEvent } from "./useWindowEvent";
 
 interface UseOutsideClickOptions {
-  ignoreRefs: React.RefObject<HTMLElement>[];
-  enabled?: boolean;
+  ignoreElements: React.RefObject<HTMLElement>[];
+  enable: boolean;
   onOutsideClick(e: MouseEvent | TouchEvent): void;
 }
 
-const parrentLayers = [] as { ignoreRefs: React.RefObject<HTMLElement>[] }[];
+let queue = [] as string[];
 
-export function useOutsideClickWithLayers({ ignoreRefs, enabled = true, onOutsideClick }: UseOutsideClickOptions) {
-  const handleOutsideClick = useEvent(onOutsideClick);
+export function useOutsideClickWithLayers({ ignoreElements, enable = false, onOutsideClick }: UseOutsideClickOptions) {
+  const id = useId();
 
   useEffect(() => {
-    if (!enabled) {
+    const deleteElement = () => {
+      queue = queue.filter((str) => str !== id);
+    };
+
+    if (enable) {
+      queue.push(id);
+    } else {
+      deleteElement();
+    }
+
+    return deleteElement;
+  }, [enable, id]);
+
+  const handleMouseDown = (e: MouseEvent | TouchEvent) => {
+    if (!enable) {
       return;
     }
 
-    const handleClick = (e: MouseEvent | TouchEvent) => {
-      const target = e.target;
-      if (!(target instanceof Node)) {
-        return;
-      }
+    const queueIndex = queue.findIndex((str) => str === id);
 
-      if (!ignoreRefs.length) {
-        return;
-      }
+    if (queueIndex !== queue.length - 1) {
+      return;
+    }
 
-      if (!ignoreRefs.some((element) => element.current && element.current.contains(target))) {
-        handleOutsideClick(e);
-      }
-    };
+    const target = e.target;
 
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("touchstart", handleClick);
+    if (!(target instanceof Node)) {
+      return;
+    }
 
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("touchstart", handleClick);
-    };
-  }, [enabled, ignoreRefs, handleOutsideClick]);
+    if (!ignoreElements.length) {
+      return;
+    }
+
+    if (!ignoreElements.some((ref) => ref.current && ref.current.contains(target))) {
+      onOutsideClick(e);
+    }
+  };
+
+  useWindowEvent("mousedown", handleMouseDown);
 }

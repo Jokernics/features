@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useRef } from "react";
 import { ReactComponent as CloseIcon } from "./close-circle-outline.svg";
 import Modal from "../Modal/Modal";
+import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 interface props extends React.HTMLProps<HTMLImageElement> {
   initialScale?: number;
@@ -10,9 +11,6 @@ interface props extends React.HTMLProps<HTMLImageElement> {
   clickScaleStep?: number;
   scrollScaleStep?: number;
 }
-
-let isMouseDrag = false;
-let isMouseDown = false;
 
 export default function ImageWithZoomModalView({
   src,
@@ -28,8 +26,9 @@ export default function ImageWithZoomModalView({
   const [isModalView, setIsModalView] = useState(false);
   const [scale, setScale] = useState(initialScale);
   const [imageCords, setImageCords] = useState({ top: 0, left: 0 });
-  const contanerRef = useRef<HTMLDivElement | null>(null);
-  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const isMouseDrag = useRef(false);
+  const isMouseDown = useRef(false);
 
   const changeWheelScale = (dir: number) => {
     let newScale = scale;
@@ -54,18 +53,6 @@ export default function ImageWithZoomModalView({
     setIsModalView(true);
   };
 
-  const onContainerClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const target = e.target;
-
-    if (!closeBtnRef.current || !(target instanceof Node)) return;
-
-    if (target.contains(contanerRef.current) || closeBtnRef.current.contains(target)) {
-      setIsModalView(false);
-      isMouseDrag = false;
-      isMouseDown = false;
-    }
-  };
-
   const onMouseWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const dir = Math.sign(e.deltaY);
 
@@ -73,9 +60,9 @@ export default function ImageWithZoomModalView({
   };
 
   const onMouseMove = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (!isMouseDown) return;
+    if (!isMouseDown.current) return;
 
-    isMouseDrag = true;
+    isMouseDrag.current = true;
 
     const { movementX, movementY } = e;
 
@@ -86,25 +73,33 @@ export default function ImageWithZoomModalView({
   };
 
   const onMouseDown = () => {
-    isMouseDown = true;
+    isMouseDown.current = true;
   };
 
   const onMouseUp = () => {
-    isMouseDown = false;
+    isMouseDown.current = false;
   };
 
   const onModalImageClick = () => {
-    if (!isMouseDrag) handleClickScale();
+    if (!isMouseDrag.current) handleClickScale();
 
-    isMouseDrag = false;
+    isMouseDrag.current = false;
   };
+
+  const handleOutsideClick = () => {
+    setIsModalView(false);
+    isMouseDrag.current = false;
+    isMouseDown.current = false;
+  }
+
+  useOutsideClick({ ignoreElements: [imageRef], onOutsideClick: handleOutsideClick })
 
   return (
     <>
-      <Modal ref={contanerRef} onClick={onContainerClick} onWheel={onMouseWheel} onMouseMove={onMouseMove} open={isModalView}>
+      <Modal onWheel={onMouseWheel} onMouseMove={onMouseMove} open={isModalView}>
         <>
-          <button ref={closeBtnRef} className="absolute top-1 right-1 cursor-pointer hover:scale-105 transition-all z-10">
-            <CloseIcon className="w-9 h-9 fill-brand-blue hover:fill-dark-blue" />
+          <button className="absolute top-1 right-1 cursor-pointer hover:scale-105 transition-all z-10">
+            <CloseIcon className="w-9 h-9" />
           </button>
           <div
             style={{
@@ -119,7 +114,7 @@ export default function ImageWithZoomModalView({
             onMouseUp={onMouseUp}
             onClick={onModalImageClick}
           >
-            <img draggable="false" className="select-none cursor-grabbing" src={src} alt={alt} />
+            <img ref={imageRef} draggable="false" className="select-none cursor-grabbing" src={src} alt={alt} />
           </div>
         </>
       </Modal>
