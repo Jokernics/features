@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useRef, useState } from "react";
 import Loader from "../Loader/Loader";
-import { ReactComponent as ArrowIcon } from "../../assets/svg/arrow.svg";
+import { ReactComponent as ArrowIcon } from "./arrow.svg";
 import "./index.css";
 
 type props = {
@@ -52,10 +52,10 @@ export default function Button({
       {isLoading && <div className="absolute flex items-center">{<Loader />}</div>}
       {isSuccessArrow && (
         <p className="absolute">
-          <ArrowIcon style={{ animationDuration: ".8s" }} className="mx-auto overflow-hidden fadeIn fill-black" />
+          <ArrowIcon style={{ animationDuration: ".8s" }} className="mx-auto overflow-hidden button_fadeIn fill-black" />
         </p>
       )}
-      <p className={`${isLoading || isSuccessArrow ? "invisible" : ""} ${!isSuccessArrow && isSuccess ? "fadeIn" : ""}`}>
+      <p className={`${isLoading || isSuccessArrow ? "invisible" : ""} ${!isSuccessArrow && isSuccess ? "button_fadeIn" : ""}`}>
         {children}
       </p>
     </button>
