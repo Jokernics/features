@@ -41,7 +41,7 @@ const createElement = () => {
 const createItems = () =>
   Array.from({ length: 10_000 }, (_) => ({
     id: Math.random().toString(36).slice(2),
-    text: null,
+    text: createElement(),
   }));
 
 type Key = string | number;
@@ -301,6 +301,8 @@ function useDynamicSizeList(props: UseDynamicSizeListProps) {
 
       const item = allItems[index]!;
       const delta = height - item.height;
+      console.log(delta)
+      console.log(delta !== 0 && scrollTop > item.offsetTop)
 
       if (delta !== 0 && scrollTop > item.offsetTop) {
         const element = getScrollElement();
@@ -349,7 +351,7 @@ export default function DynamicHeight() {
   const [cache, setCache] = useState<Record<number, string>>({})
 
   const { virtualItems, totalHeight, measureElement, isScrolling, startIndex, endIndex } = useDynamicSizeList({
-    estimateItemHeight: useCallback(() => 20, []),
+    estimateItemHeight: useCallback(() => 5, []),
     itemsCount: listItems.length,
     getScrollElement: useCallback(() => scrollElementRef.current, []),
     getItemKey: useCallback((index) => listItems[index].id, [listItems]),
@@ -383,14 +385,15 @@ export default function DynamicHeight() {
     }
   }, [cache, endIndex, isScrolling, listItems.length, startIndex])
 
+
   return (
     <div style={{ padding: "0 12px" }}>
       <div className="flex gap-2"><h1>List</h1>
         <button onClick={() => {
-          setListItems(prev => [{ id: Math.random().toString(36).slice(2), text: null }, ...prev])
+          setListItems(prev => [{ id: Math.random().toString(36).slice(2), text: createElement() }, ...prev])
         }}>Add item in start</button>
         <button onClick={() => {
-          setListItems(prev => [...prev, { id: Math.random().toString(36).slice(2), text: null }])
+          setListItems(prev => [...prev, { id: Math.random().toString(36).slice(2), text: createElement() }])
         }}>Add item in end</button>
 
       </div>
@@ -428,12 +431,13 @@ export default function DynamicHeight() {
                   padding: "6px 12px",
                 }}
               >
-                {!isLoaded && (
+                <div>{item.text}</div>
+                {/* {!isLoaded && (
                   <div className="w-full h-52"></div>
                 )}
                 {isLoaded && (
                   <div className="w-full">{virtualItem.index} {cache[virtualItem.index]}</div>
-                )}
+                )} */}
               </div>
             );
           })}
