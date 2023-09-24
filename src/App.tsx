@@ -7,9 +7,11 @@ import ImageWithZoomExample from "./components/Examples/ImageWithZoomExample";
 import NoticeExample from "./components/Examples/NoticeExample";
 import TipExample from "./components/Examples/TipExample";
 import { NoticeProvider } from "./components/Notifications/NoticeProvider";
+import DynamicHeightGrid from "./components/ReactVirtualized/ReactVirtualized";
 import TipPositionHelper from "./components/Tip/TipPositionHelper";
 
 function App() {
+  return <DynamicHeightGrid />
   return (
     <NoticeProvider>
       <div className="flex flex-col overflow-auto h-screen px-4 py-2 gap-4">
@@ -18,8 +20,9 @@ function App() {
         <ImageWithZoomExample />
         {/* <ContextMenuExample /> */}
         <TipExample />
-        <FileInputExample /> 
-        <ContextMenuExample2 />
+        <FileInputExample />
+        <ContextMenuExample2 />\
+
       </div>
     </NoticeProvider>
   );
