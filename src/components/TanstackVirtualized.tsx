@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker'
 import { useVirtualizer, Virtualizer } from '@tanstack/react-virtual'
 import useDebounce from '../hooks/useDebounce'
 import { useRef, useState } from 'react'
+import { useThrottle } from '../hooks/useThrottle'
 
 
 const randomNumber = (min: number, max: number) =>
@@ -16,8 +17,16 @@ export default function RowVirtualizerDynamic() {
   const parentRef = useRef<HTMLDivElement>(null)
   const [cache, setCache] = useState<Record<number, string>>({})
 
-  const handleChange = async (instance: Virtualizer<HTMLDivElement, Element>) => {
-    const { startIndex, endIndex } = instance.range
+
+
+  const getData = async (startIndex: number, endIndex: number) => {
+    let isAllItemsCached = true
+
+    for (let i = startIndex; i <= endIndex; i++) {
+      if (!cache.hasOwnProperty(i)) isAllItemsCached = false
+    }
+
+    if (isAllItemsCached) return
 
     const res = await fetch('https://jsonplaceholder.typicode.com/comments/2')
     const data = await res.json()
@@ -30,8 +39,17 @@ export default function RowVirtualizerDynamic() {
 
     setCache(p => ({ ...p, ...newData }))
   }
-  console.log(cache)
+
+
+  const handleChange = async (instance: Virtualizer<HTMLDivElement, Element>) => {
+    const { startIndex, endIndex } = instance.range
+    console.log(startIndex, endIndex)
+
+    getData(startIndex, endIndex)
+  }
+
   const handleChangeDebounce = useDebounce(handleChange, 500)
+
 
   const count = sentences.length
   const virtualizer = useVirtualizer({
