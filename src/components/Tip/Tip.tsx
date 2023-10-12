@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useCombinedRef } from "../../hooks/useCombinedRef";
 
@@ -28,7 +28,7 @@ export default forwardRef<HTMLDivElement, propsType>(function Tip({ children, ti
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  useLayoutEffect(() => {
+  const calculationCords = useCallback(() => {
     if (!isMounted || !tipRef.current || !contentRef.current) return;
 
     const contentMetrics = contentRef.current.getBoundingClientRect();
@@ -58,8 +58,11 @@ export default forwardRef<HTMLDivElement, propsType>(function Tip({ children, ti
       left: leftPosition,
     });
     setArrowCords({ top: arrowTop, left: arrowLeft });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
+  }, [gapX, gapY, isMounted])
+
+  useLayoutEffect(() => {
+    calculationCords()
+  }, [calculationCords]);
 
   const handleContentMouseEnter = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (manualOpen !== undefined) return;

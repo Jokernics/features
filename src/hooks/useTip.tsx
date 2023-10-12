@@ -25,6 +25,10 @@ export default function useTip({ tipText = "", gapX = 0, gapY = 0 }: propsType) 
   const contentRef = useRef<HTMLDivElement | null>(null);
   const hoverOutTimer = useRef<ReturnType<typeof setTimeout>>();
 
+  const handleTipRef = (element: HTMLDivElement | null) => {
+    tipRef.current = element
+  } 
+
   useLayoutEffect(() => {
     if (!isMounted || !tipRef.current || !contentRef.current) return;
 
@@ -112,7 +116,7 @@ export default function useTip({ tipText = "", gapX = 0, gapY = 0 }: propsType) 
                   rounded-lg shadow-lg px-2 py-1 text-gray-500 text-sm
                   bg-opacity-50 border-2 
                 "
-                ref={tipRef}
+                ref={handleTipRef}
                 onMouseEnter={handleTipMouseEnter}
                 onMouseLeave={handleTipMouseLeave}
               >

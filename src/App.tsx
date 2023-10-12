@@ -1,29 +1,26 @@
 import "./App.css";
 import ButtonExample from "./components/Examples/ButtonExample";
-import ContextMenuExample from "./components/Examples/ContextMenuExample";
 import ContextMenuExample2 from "./components/Examples/ContextMenuExample2";
 import FileInputExample from "./components/Examples/FileInputExample";
 import ImageWithZoomExample from "./components/Examples/ImageWithZoomExample";
 import NoticeExample from "./components/Examples/NoticeExample";
 import TipExample from "./components/Examples/TipExample";
+import VerticalSliderExample from "./components/Examples/VerticalSliderExample";
 import { NoticeProvider } from "./components/Notifications/NoticeProvider";
-import DynamicHeightGrid from "./components/ReactVirtualized/ReactVirtualized";
-import TanstackVirtualized from "./components/TanstackVirtualized";
-import TipPositionHelper from "./components/Tip/TipPositionHelper";
+import Tip from "./components/Tip/Tip";
 
 function App() {
-  return <TanstackVirtualized />
   return (
     <NoticeProvider>
       <div className="flex flex-col overflow-auto h-screen px-4 py-2 gap-4">
         <NoticeExample />
-        <ButtonExample />
+        <VerticalSliderExample />
+        {/* <Tip tipContent={'sdfsdf'}><ButtonExample /></Tip> */}
         <ImageWithZoomExample />
         {/* <ContextMenuExample /> */}
-        <TipExample />
-        <FileInputExample />
-        <ContextMenuExample2 />\
-
+        {/* <TipExample /> */}
+        {/* <FileInputExample /> */}
+        {/* <ContextMenuExample2 /> */}
       </div>
     </NoticeProvider>
   );

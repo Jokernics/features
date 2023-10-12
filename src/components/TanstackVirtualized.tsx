@@ -9,15 +9,23 @@ import { useThrottle } from '../hooks/useThrottle'
 const randomNumber = (min: number, max: number) =>
   faker.number.int({ min, max })
 
+const getRandomId = () => Math.random().toString(36).slice(2)
+
+const getValue = () => {
+  return faker.lorem.sentence(randomNumber(20, 70))
+}
+
 const sentences = new Array(10000)
   .fill(true)
-  .map(() => faker.lorem.sentence(randomNumber(20, 70)))
+  .map((_, i) => ({
+    id: Math.random().toString(36).slice(2),
+    value: getValue()
+  }))
 
 export default function RowVirtualizerDynamic() {
   const parentRef = useRef<HTMLDivElement>(null)
-  const [cache, setCache] = useState<Record<number, string>>({})
-
-
+  const [cache, setCache] = useState<Record<string, string>>({})
+  const [data, setData] = useState(sentences)
 
   const getData = async (startIndex: number, endIndex: number) => {
     let isAllItemsCached = true
@@ -29,12 +37,13 @@ export default function RowVirtualizerDynamic() {
     if (isAllItemsCached) return
 
     const res = await fetch('https://jsonplaceholder.typicode.com/comments/2')
-    const data = await res.json()
-    const str = data.body + data.name
+    const resData = await res.json()
+    const str = resData.body + resData.name
 
-    let newData: Record<number, string> = {}
+    let newData: Record<string, string> = {}
     for (let i = startIndex; i <= endIndex; i++) {
-      newData[i] = str
+      const id = data[i].id
+      newData[id] = str
     }
 
     setCache(p => ({ ...p, ...newData }))
@@ -48,22 +57,30 @@ export default function RowVirtualizerDynamic() {
     getData(startIndex, endIndex)
   }
 
-  const handleChangeDebounce = useDebounce(handleChange, 500)
+  const handleChangeDebounce = useDebounce(handleChange, 100)
 
 
-  const count = sentences.length
+  const count = data.length
   const virtualizer = useVirtualizer({
     count,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 120,
-    onChange: handleChangeDebounce
+    onChange: handleChangeDebounce,
+getItemKey: (index) => data[index].id
+
   })
 
   const items = virtualizer.getVirtualItems()
-
+  console.log(count)
   return (
     <div className='w-screen h-screen flex flex-col'>
       <div className='flex'>
+        <button onClick={() => {
+          setData(prev => [{ value: getValue(), id: getRandomId() }, ...prev])
+        }}>Add to Start</button>
+        <button onClick={() => {
+          setData(prev => [...prev, { id: getRandomId(), value: getValue() }])
+        }}>Add to End</button>
         <button
           onClick={() => {
             virtualizer.scrollToIndex(0)
@@ -117,7 +134,8 @@ export default function RowVirtualizerDynamic() {
             }}
           >
             {items.map((virtualRow) => {
-              const isItemLoaded = cache.hasOwnProperty(virtualRow.index)
+              const id = data[virtualRow.index].id
+              const isItemLoaded = cache.hasOwnProperty(id)
 
               return <div
                 key={virtualRow.key}
@@ -129,7 +147,7 @@ export default function RowVirtualizerDynamic() {
               >
                 {!isItemLoaded && <div>Loading...</div>}
                 {isItemLoaded && <div style={{ padding: '10px 0' }}>
-                  <div>{cache[virtualRow.index]}</div>
+                  <div>{cache[id]}</div>
                 </div>}
               </div>
             })}
