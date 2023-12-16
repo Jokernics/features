@@ -7,7 +7,6 @@ export default function NoticeExample() {
 
   return (
     <div>
-      {" "}
       <input
         type="text"
         ref={notificationInputRef}

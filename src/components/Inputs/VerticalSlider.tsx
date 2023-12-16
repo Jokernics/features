@@ -17,11 +17,7 @@ export default function VerticalSlider({ currentIndex, totalCount, onChange, hei
   }, [height, totalCount]);
 
   const getScrollInitialPosition = useCallback(() => {
-    console.log('currentIndex', currentIndex)
-    console.log('totalCount', totalCount)
     const procent = Math.min(totalCount, currentIndex) / totalCount;
-    console.log(procent);
-
     return procent * (height - scrollHeight);
   }, [currentIndex, height, scrollHeight, totalCount])
   const dragAreaRef = useRef<HTMLDivElement | null>(null);
@@ -40,7 +36,6 @@ export default function VerticalSlider({ currentIndex, totalCount, onChange, hei
 
 
   useEffect(() => {
-    console.log('here')
     setScrollOffestTop(getScrollInitialPosition())
   }, [currentIndex, getScrollInitialPosition, totalCount])
 
@@ -53,7 +48,7 @@ export default function VerticalSlider({ currentIndex, totalCount, onChange, hei
     if (!isMouseDownRef.current || !offsetRef.current) return
 
     const newHeight = event.clientY + offsetRef.current
-
+    console.log(newHeight)
     if (newHeight > height - scrollHeight || newHeight < 0) return
 
     setScrollOffestTop(newHeight)
@@ -70,18 +65,13 @@ export default function VerticalSlider({ currentIndex, totalCount, onChange, hei
     <div ref={scrollBarRef} style={{ height }} className="relative border-l-[1px] border-l-slate-200">
       <div className="" style={{ height: scrollOffestTop }}></div>
       <div
-
         ref={dragAreaRef}
         onMouseDown={(e) => {
           isMouseDownRef.current = true
           if (dragAreaRef.current) {
             offsetRef.current = dragAreaRef.current.offsetTop - e.clientY
-            console.log(offsetRef.current)
-            console.log(dragAreaRef.current.offsetTop)
-            console.log(e.clientY)
           }
         }}
-
         className="flex select-none items-center h-[50px] ml-[-0.22em] cursor-s-resize gap-2"
         style={{ height: scrollHeight }}
       >
