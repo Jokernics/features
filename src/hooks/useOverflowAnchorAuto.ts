@@ -46,7 +46,7 @@ export const useOverflowAnchorAuto = ({
         }
       }
     }
-  }, []);
+  }, [scrollContainerRef]);
 
   const handleResizeObserverEvent = useEvent(handleResizeObserver);
 
@@ -69,7 +69,7 @@ export const useOverflowAnchorAuto = ({
     if (el) {
       resizeObserverRef.current.observe(el);
     }
-  }, []);
+  }, [scrollContainerRef]);
 
   useEffect(() => {
     const resizeObserver = resizeObserverRef.current;

@@ -99,7 +99,7 @@ export default function SomeExample() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <div style={{ display: 'flex', padding: '0.5rem', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} >
+      <div style={{ display: 'flex', padding: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} >
         <div style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', borderRight: '1px solid gray' }} >
           <Input value={changeElementsHeightsInputValue} onChange={(e) => { setChangeElementsHeightsInputValue(e.target.value) }} />
           <Button onClick={changeHeightOfElementForAWhile}>Change element height to 2 s</Button>
