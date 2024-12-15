@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useOverflowAnchorAuto } from '../../hooks/useOverflowAnchorAuto';
+import { useAddEventListener } from '../../hooks/useAddEventListener';
 
 export function useEvent<T extends Function>(fn: T) {
   const fnRef = useRef(fn);
@@ -97,6 +98,9 @@ export default function SomeExample() {
 
   const { childRef } = useOverflowAnchorAuto({ scrollContainerRef })
 
+  useAddEventListener(scrollContainerRef, 'scroll', (e) => {
+    console.log(e.isTrusted)
+  })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
       <div style={{ display: 'flex', padding: '0.5rem', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} >

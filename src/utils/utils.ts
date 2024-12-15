@@ -29,7 +29,6 @@ export const getRange = (scrollElement: HTMLDivElement) => {
 };
 
 export const getIndexForMap = (range: rangeType, total: number) => {
-  console.log('range', range)
   if (range.endIndex >= total) return total;
   if (range.startIndex === 1) return 1
   return range.startIndex;
