@@ -7,7 +7,7 @@ export default function ImageWithZoomExample() {
       <div >
         <Tip tipContent={"Надеко ТЯЯЯЯН"}>
           <ImageWithZoomModalView
-            src="https://shikimori.me/uploads/poster/characters/22050/main_2x-a798062252ba8bd09937d5ed93bd4f84.webp"
+            src="https://99px.ru/sstorage/53/2018/08/tmb_233526_520918.png"
             className="h-60"
             initialScale={0.8}
             minScale={0.2}

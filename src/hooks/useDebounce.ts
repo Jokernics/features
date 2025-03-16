@@ -1,19 +1,21 @@
 import { useCallback, useRef } from "react";
+import { useEvent } from "./useEvent";
 
-export default function useDebounce<T>(callback: (...args: T[]) => void, delay: number) {
+export default function useDebounce<T extends (...args: never[]) => unknown>(callback: T, delay: number) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callbackPersistent = useEvent(callback)
 
   const debouncedCallback = useCallback(
-    (...args: T[]) => {
+    (...args: never[]) => {
       if (timer.current) {
         clearTimeout(timer.current);
       }
       timer.current = setTimeout(() => {
-        callback(...args);
+        callbackPersistent(...args);
       }, delay);
     },
-    [callback, delay]
+    [callbackPersistent, delay]
   );
 
-  return debouncedCallback;
+  return debouncedCallback as T;
 }

@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from "react";
+import React, { createContext, useMemo, useState } from "react";
 import Notifications from "./Notifications";
 
 export interface noticeType {
@@ -28,7 +28,7 @@ export const NoticeContext = createContext<NoticeContextTypes>({ addNotice: (arg
 let keyCounter = 0;
 const contextValue = {} as NoticeContextTypes;
 export const NoticeProvider = ({ children }: { children: JSX.Element }) => {
-  const [notifications, setNotifications] = useState<storeNoticeType[]>([example]);
+  const [notifications, setNotifications] = useState<storeNoticeType[]>([]);
 
   const addNotice = (data: noticeType) => {
     const newNotice = { key: `${keyCounter}`, ...data };
