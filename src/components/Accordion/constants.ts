@@ -1,0 +1,2 @@
+export const ANIMATION_TIME_OPEN = 200;
+export const ANIMATION_TIME_CLOSE = 150;
